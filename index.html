@@ -148,4 +148,81 @@
     }
 
     // --- 4. GAME MECHANICS ---
-    function moveLeft() { if(gameState === 'PLAYING' &&
+    function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
+    function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
+    window.addEventListener('keydown', (e) => { if(e.key === 'ArrowLeft') moveLeft(); if(e.key === 'ArrowRight') moveRight(); });
+    document.getElementById('left-zone').addEventListener('touchstart', moveLeft); document.getElementById('right-zone').addEventListener('touchstart', moveRight);
+
+    function startGame(id) {
+        gameState = 'PLAYING'; score = 0; gameSpeed = 0.6; playerLane = 1; enemyLane = 2;
+        objects.forEach(o => scene.remove(o)); objects = [];
+        environment.forEach(e => scene.remove(e)); environment = [];
+
+        document.getElementById('sidebar').style.display = 'none';
+        document.getElementById('achievements').style.display = 'none';
+        document.getElementById('hud').style.display = 'block';
+        document.getElementById('touch-zones').style.display = 'block';
+
+        camera.position.set(0, 5, -8); camera.lookAt(0, 1, 10);
+        playerCar.position.set(lanes[playerLane], 0, 5);
+        enemyCar.position.set(lanes[enemyLane], 0, 15);
+    }
+
+    function spawnObstacle() {
+        const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1, 1.8), new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.5 }));
+        const lane = Math.floor(Math.random() * 4);
+        obs.position.set(lanes[lane], 0.5, 120); obs.castShadow = true; obs.lane = lane;
+        scene.add(obs); objects.push(obs);
+    }
+
+    let timer = 0;
+    function animate() {
+        requestAnimationFrame(animate);
+
+        if (gameState === 'HUB') {
+            playerCar.position.set(0,0,0); playerCar.rotation.y += 0.005;
+            camera.position.set(5, 3, -7); camera.lookAt(0,0,0);
+            enemyCar.position.y = -100; // Hide enemy in hub
+        } 
+        else if (gameState === 'PLAYING') {
+            playerCar.rotation.y = 0; enemyCar.position.y = 0;
+            playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * 0.15;
+            playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.05;
+            
+            enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.1;
+            let danger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 40);
+            if(danger) { if(enemyLane > 0) enemyLane--; else enemyLane++; }
+
+            gameSpeed += 0.0002; score += gameSpeed;
+            document.getElementById('score-display').innerText = Math.floor(score);
+
+            timer += gameSpeed; if(timer > 2) { spawnObstacle(); timer = 0; }
+
+            objects.forEach((obj, index) => {
+                obj.position.z -= gameSpeed * 2;
+                if(obj.position.z < -10) { scene.remove(obj); objects.splice(index, 1); }
+                if(Math.abs(playerCar.position.x - obj.position.x) < 1.5 && Math.abs(playerCar.position.z - obj.position.z) < 2) gameOver();
+            });
+        }
+        renderer.render(scene, camera);
+    }
+
+    function gameOver() {
+        gameState = 'HUB'; 
+        let reward = Math.floor(score / 50); coins += reward; updateUI();
+        let rank = score > 500 ? "Champion" : "Peanut Tier";
+        document.getElementById('rank-display').innerText = rank;
+        document.getElementById('rank-display').style.color = score > 500 ? "#ffd700" : "#ff4444";
+        
+        document.getElementById('sidebar').style.display = 'block';
+        document.getElementById('achievements').style.display = 'block';
+        document.getElementById('hud').style.display = 'none';
+        document.getElementById('touch-zones').style.display = 'none';
+        alert(`CRASHED! Score: ${Math.floor(score)}. Earned ${reward} coins.`);
+    }
+
+    window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    animate();
+</script>
+</body>
+</html>
