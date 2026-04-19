@@ -3,30 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DK Games Hub - Hyper Drive</title>
+    <title>DK Games Hub - Complete Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        :root { --neon: #00ffcc; --glass: rgba(5, 5, 12, 0.85); }
-        body { margin: 0; overflow: hidden; background: #010103; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; }
+        :root { --neon: #00ffcc; --glass: rgba(10, 15, 20, 0.85); }
+        body { margin: 0; overflow: hidden; background: #050b14; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; }
         
-        #header { position: absolute; top: 0; width: 100%; padding: 15px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 204, 0.2); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
-        .title { font-size: 22px; font-weight: 900; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; letter-spacing: 1px; }
+        #header { position: absolute; top: 0; width: 100%; padding: 15px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 204, 0.2); display: flex; justify-content: space-between; align-items: center; z-index: 20; }
+        .title { font-size: 22px; font-weight: 900; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
         .economy { font-size: 18px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
         
-        #sidebar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; background: var(--glass); backdrop-filter: blur(20px); padding: 25px; border-radius: 15px; border: 1px solid var(--neon); box-shadow: 0 0 40px rgba(0, 255, 204, 0.15); z-index: 20; text-align: center; }
+        #sidebar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; background: var(--glass); backdrop-filter: blur(20px); padding: 25px; border-radius: 15px; border: 1px solid var(--neon); box-shadow: 0 0 40px rgba(0, 255, 204, 0.15); z-index: 20; text-align: center; max-height: 80vh; overflow-y: auto; }
         h3 { margin-top: 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
         
-        button { width: 100%; padding: 15px; margin: 8px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); border-color: var(--neon); }
-        .play-btn { background: rgba(0, 255, 204, 0.15); border-color: var(--neon); color: var(--neon); font-size: 20px; text-transform: uppercase; margin-top: 20px; box-shadow: inset 0 0 10px rgba(0,255,204,0.2); }
+        button { width: 100%; padding: 12px; margin: 6px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); border-color: var(--neon); }
+        .play-btn { background: rgba(0, 255, 204, 0.15); border-color: var(--neon); color: var(--neon); font-size: 18px; text-transform: uppercase; margin-top: 10px; }
         
-        #hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); text-align: center; display: none; z-index: 10; width: 100%; }
+        #hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); text-align: center; display: none; z-index: 10; width: 100%; pointer-events: none; }
         #score-display { font-size: 42px; font-weight: 900; color: white; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
         #difficulty-display { font-size: 18px; font-weight: bold; color: #00ffcc; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
         
         #mobile-controls { position: absolute; bottom: 30px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 50; }
         .steer-btn { width: 85px; height: 85px; background: rgba(0, 255, 204, 0.1); border: 2px solid rgba(0,255,204,0.5); border-radius: 50%; color: var(--neon); font-size: 30px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); backdrop-filter: blur(5px); }
-        .steer-btn:active { background: rgba(0,255,204,0.4); border-color: var(--neon); transform: scale(0.95); }
+        
+        /* Game 2 Styles */
+        #reflex-game { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; z-index: 30; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; }
+        #reflex-text { font-size: 30px; font-weight: bold; pointer-events: none; text-align: center; padding: 20px; }
     </style>
 </head>
 <body>
@@ -37,10 +40,13 @@
 </div>
 
 <div id="sidebar">
-    <h3>Garage: 2017 Swift Custom</h3>
-    <button onclick="buyMod(100, 'ECU')">ECU Tuning (+Points) - 100c</button>
-    <button onclick="buyMod(120, 'Tires')">Pro Slicks (+Dodge) - 120c</button>
-    <button class="play-btn" onclick="startGame()">▶ Start Engine</button>
+    <h3>Garage: Custom 3D Racer</h3>
+    <button id="btn-ecu" onclick="buyMod(100, 'ECU')">ECU Tuning (+Points) - 100c</button>
+    <button id="btn-tires" onclick="buyMod(120, 'Tires')">Pro Slicks (+Dodge) - 120c</button>
+    <button class="play-btn" onclick="startRacingGame()">1. Play 3D Racing</button>
+    
+    <h3 style="margin-top: 20px;">Arcade</h3>
+    <button class="play-btn" onclick="startReflexGame()" style="border-color: #ff0055; color: #ff0055;">2. Play Reflex Master</button>
 </div>
 
 <div id="hud">
@@ -53,106 +59,145 @@
     <div class="steer-btn" id="btn-right">▶</div>
 </div>
 
+<div id="reflex-game" onclick="reflexClick()">
+    <div id="reflex-text">Wait for Green...</div>
+</div>
+
 <script>
-    // --- 1. REBALANCED GAME VARIABLES ---
-    let gameState = 'HUB'; 
-    let coins = 350; let score = 0; 
-    let baseSpeed = 0.15; // VERY slow and easy start
-    let scoreMultiplier = 1.0; 
-    let handlingSpeed = 0.15; 
+    // --- AUDIO SYNTHESIZER ENGINE ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        
+        if(type === 'coin') {
+            osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
+        } else if(type === 'rev') {
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(150, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+        } else if(type === 'crash') {
+            osc.type = 'square'; osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        }
+    }
+
+    // --- SAVE SYSTEM & ECONOMY ---
+    let coins = 350; let scoreMultiplier = 1.0; let handlingSpeed = 0.15;
     
+    function loadSaveData() {
+        if(localStorage.getItem('dkCoins')) coins = parseInt(localStorage.getItem('dkCoins'));
+        if(localStorage.getItem('dkECU')) { scoreMultiplier = parseFloat(localStorage.getItem('dkECU')); document.getElementById('btn-ecu').innerText = "ECU Tuned (Maxed)"; document.getElementById('btn-ecu').disabled = true; }
+        if(localStorage.getItem('dkTires')) { handlingSpeed = parseFloat(localStorage.getItem('dkTires')); document.getElementById('btn-tires').innerText = "Pro Slicks (Maxed)"; document.getElementById('btn-tires').disabled = true; }
+        document.getElementById('coin-display').innerText = coins;
+    }
+    
+    function buyMod(cost, mod) {
+        if(coins >= cost) {
+            coins -= cost; playSound('coin');
+            if(mod === 'ECU') { scoreMultiplier = 1.5; localStorage.setItem('dkECU', scoreMultiplier); document.getElementById('btn-ecu').innerText = "ECU Tuned (Maxed)"; document.getElementById('btn-ecu').disabled = true; }
+            if(mod === 'Tires') { handlingSpeed = 0.4; localStorage.setItem('dkTires', handlingSpeed); document.getElementById('btn-tires').innerText = "Pro Slicks (Maxed)"; document.getElementById('btn-tires').disabled = true; }
+            localStorage.setItem('dkCoins', coins); document.getElementById('coin-display').innerText = coins;
+        } else { alert("Not enough coins!"); }
+    }
+    loadSaveData(); // Load on startup
+
+    // --- GAME 2: REFLEX MASTER ---
+    let reflexState = 'waiting'; let reflexStart = 0; let reflexTimer;
+    function startReflexGame() {
+        document.getElementById('sidebar').style.display = 'none';
+        let rg = document.getElementById('reflex-game');
+        rg.style.display = 'flex'; rg.style.background = '#aa0000';
+        document.getElementById('reflex-text').innerText = "Wait for GREEN...";
+        document.getElementById('reflex-text').style.color = "white";
+        reflexState = 'waiting';
+        
+        let waitTime = 2000 + (Math.random() * 4000); // 2 to 6 seconds
+        reflexTimer = setTimeout(() => {
+            rg.style.background = '#00cc44';
+            document.getElementById('reflex-text').innerText = "TAP NOW!";
+            reflexStart = Date.now();
+            reflexState = 'ready';
+        }, waitTime);
+    }
+
+    function reflexClick() {
+        if(reflexState === 'waiting') {
+            clearTimeout(reflexTimer);
+            document.getElementById('reflex-text').innerText = "Too Early! Tap to return.";
+            reflexState = 'fail';
+        } else if(reflexState === 'ready') {
+            let reactionTime = Date.now() - reflexStart;
+            let reward = reactionTime < 300 ? 50 : 10; // Fast reflexes get 50 coins
+            coins += reward; localStorage.setItem('dkCoins', coins); loadSaveData(); playSound('coin');
+            document.getElementById('reflex-text').innerHTML = `Time: ${reactionTime}ms<br><br>+${reward} Coins earned.<br>Tap to return.`;
+            reflexState = 'done';
+        } else if(reflexState === 'fail' || reflexState === 'done') {
+            document.getElementById('reflex-game').style.display = 'none';
+            document.getElementById('sidebar').style.display = 'block';
+        }
+    }
+
+    // --- GAME 1: 3D RACING CORE ---
+    let gameState = 'HUB'; let score = 0; let baseSpeed = 0.15; 
     let playerLane = 1; let enemyLane = 2; const lanes = [-4.5, -1.5, 1.5, 4.5];
     let objects = []; let roadLines = [];
 
-    function updateUI() { document.getElementById('coin-display').innerText = coins; }
-    function buyMod(cost, mod) {
-        if(coins >= cost) {
-            coins -= cost; updateUI();
-            if(mod === 'ECU') { scoreMultiplier += 0.5; alert("ECU Tuned! Score increases faster."); }
-            if(mod === 'Tires') { handlingSpeed = 0.4; alert("Pro Slicks applied! Steering is razor sharp."); }
-        } else { alert("Not enough coins!"); }
-    }
-
-    // --- 2. NEXT-LEVEL WEB GRAPHICS (PARTICLES & LIGHTING) ---
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x010103, 0.012); 
+    const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x050b14, 0.012);
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 400);
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
+    renderer.setSize(window.innerWidth, window.innerHeight); renderer.shadowMap.enabled = true;
     document.body.appendChild(renderer.domElement);
 
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    const dirLight = new THREE.DirectionalLight(0xaaccff, 1.8);
-    dirLight.position.set(20, 50, -20); dirLight.castShadow = true;
-    scene.add(dirLight);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+    const moonLight = new THREE.DirectionalLight(0xaaccff, 1.0); moonLight.position.set(20, 50, -20); scene.add(moonLight);
 
-    // Hyper-Drive Starfield (Particle System)
-    const starsGeo = new THREE.BufferGeometry();
-    const starsCount = 800;
-    const posArray = new Float32Array(starsCount * 3);
-    for(let i=0; i<starsCount*3; i+=3) {
-        posArray[i] = (Math.random() - 0.5) * 150; // x
-        posArray[i+1] = (Math.random() - 0.5) * 100; // y
-        posArray[i+2] = (Math.random() - 0.5) * 300; // z
-    }
+    // Weather & Road
+    const starsGeo = new THREE.BufferGeometry(); const posArray = new Float32Array(300 * 3);
+    for(let i=0; i<900; i+=3) { posArray[i] = (Math.random()-0.5)*400; posArray[i+1] = (Math.random()*150)+20; posArray[i+2] = (Math.random()-0.5)*400; }
     starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-    const starsMat = new THREE.PointsMaterial({size: 0.3, color: 0x00ffcc, transparent: true, opacity: 0.8});
-    const starsMesh = new THREE.Points(starsGeo, starsMat);
-    scene.add(starsMesh);
+    const starsMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.6, color: 0xffffff, transparent: true, opacity: 0.7})); scene.add(starsMesh);
 
-    // Road Setup
-    const roadGeo = new THREE.PlaneGeometry(16, 600);
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0e, roughness: 0.5, metalness: 0.4 });
-    const road = new THREE.Mesh(roadGeo, roadMat);
-    road.rotation.x = -Math.PI / 2; road.receiveShadow = true; scene.add(road);
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(16, 600), new THREE.MeshStandardMaterial({ color: 0x0a0a0e }));
+    road.rotation.x = -Math.PI / 2; scene.add(road);
 
-    const lineGeo = new THREE.PlaneGeometry(0.2, 5);
-    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.3 });
-    for(let i=0; i<30; i++) {
-        [-1.5, 1.5].forEach(xOffset => {
-            let line = new THREE.Mesh(lineGeo, lineMat);
-            line.rotation.x = -Math.PI / 2;
-            line.position.set(lanes[1] + xOffset, 0.01, 100 - (i * 15));
-            scene.add(line); roadLines.push(line);
-        });
-    }
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, transparent: true, opacity: 0.4 });
+    for(let i=0; i<30; i++) { [-1.5, 1.5].forEach(x => { let line = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 5), lineMat); line.rotation.x = -Math.PI/2; line.position.set(lanes[1]+x, 0.01, 100-(i*15)); scene.add(line); roadLines.push(line); }); }
 
-    // --- 3. HIGH-GLOSS CAR BUILDER ---
-    const paintMaterial = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, metalness: 0.9, roughness: 0.1, clearcoat: 1.0 });
-    
-    function createCar(material, isPlayer) {
+    // Car Builder
+    function createCar(mainColor, isPlayer) {
         const group = new THREE.Group();
-        const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4.2), material);
-        chassis.position.y = 0.5; chassis.castShadow = true; group.add(chassis);
+        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 0.9, roughness: 0.1, clearcoat: 1.0 });
+        const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4.2), pMat); chassis.position.y = 0.5; group.add(chassis);
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202})); cabin.position.set(0, 1.07, -0.2); group.add(cabin);
+        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat); spoiler.position.set(0, 1.2, -1.9); group.add(spoiler);
         
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202, roughness: 0.0}));
-        cabin.position.set(0, 1.07, -0.2); cabin.castShadow = true; group.add(cabin);
-
-        if(isPlayer) {
-            const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), material);
-            spoiler.position.set(0, 1.2, -1.9); group.add(spoiler);
-            
-            const hLight1 = new THREE.SpotLight(0x00ffcc, 4, 80, 0.3, 0.8, 1); hLight1.position.set(-0.7, 0.6, 2.1); hLight1.target.position.set(-0.7, 0, 20);
-            group.add(hLight1); group.add(hLight1.target);
-            const hLight2 = new THREE.SpotLight(0x00ffcc, 4, 80, 0.3, 0.8, 1); hLight2.position.set(0.7, 0.6, 2.1); hLight2.target.position.set(0.7, 0, 20);
-            group.add(hLight2); group.add(hLight2.target);
-        }
+        const lightColor = isPlayer ? 0x00ffcc : 0xffddaa;
+        const h1 = new THREE.SpotLight(lightColor, 4, 80, 0.3, 0.8, 1); h1.position.set(-0.7, 0.6, 2.1); h1.target.position.set(-0.7, 0, 20); group.add(h1); group.add(h1.target);
+        const h2 = new THREE.SpotLight(lightColor, 4, 80, 0.3, 0.8, 1); h2.position.set(0.7, 0.6, 2.1); h2.target.position.set(0.7, 0, 20); group.add(h2); group.add(h2.target);
         return group;
     }
 
-    const playerCar = createCar(paintMaterial, true); scene.add(playerCar);
-    const enemyCar = createCar(new THREE.MeshPhysicalMaterial({color: 0x0033aa, metalness: 0.9, roughness: 0.1, clearcoat: 1.0}), false); scene.add(enemyCar);
+    const playerCar = createCar(0xcc0000, true); scene.add(playerCar);
+    const enemyCar = createCar(0x0033aa, false); scene.add(enemyCar);
 
-    // --- 4. CONTROLS ---
+    // Controls
     function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
     function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
     window.addEventListener('keydown', (e) => { if(e.key === 'ArrowLeft') moveLeft(); if(e.key === 'ArrowRight') moveRight(); });
     document.getElementById('btn-left').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
     document.getElementById('btn-right').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
 
-    // --- 5. REBALANCED GAME LOOP (AS REQUESTED) ---
-    function startGame() {
+    // Race Loop
+    function startRacingGame() {
+        playSound('rev');
         gameState = 'PLAYING'; score = 0; baseSpeed = 0.15; playerLane = 1; enemyLane = 2;
         objects.forEach(o => scene.remove(o)); objects = [];
         camera.fov = 60; camera.updateProjectionMatrix();
@@ -160,113 +205,64 @@
         document.getElementById('sidebar').style.display = 'none';
         document.getElementById('hud').style.display = 'block';
         document.getElementById('mobile-controls').style.display = 'flex'; 
-
         camera.position.set(0, 5, -9); camera.lookAt(0, 1, 15);
-        playerCar.position.set(lanes[playerLane], 0, 5);
-        enemyCar.position.set(lanes[enemyLane], 0, 15);
+        playerCar.position.set(lanes[playerLane], 0, 5); enemyCar.position.set(lanes[enemyLane], 0, 15);
     }
 
     function spawnObstacles(count) {
-        let usedLanes = [];
+        let used = [];
         for(let i=0; i<count; i++) {
-            let lane; do { lane = Math.floor(Math.random() * 4); } while(usedLanes.includes(lane)); usedLanes.push(lane);
-            
-            const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xff0055, emissive: 0x440011, roughness: 0.2 }));
-            obs.position.set(lanes[lane], 0.6, 200 + (Math.random() * 20)); 
-            obs.castShadow = true; obs.lane = lane;
-            scene.add(obs); objects.push(obs);
-            if(usedLanes.length >= 3) break; 
+            let l; do { l = Math.floor(Math.random() * 4); } while(used.includes(l)); used.push(l);
+            const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xff0055, emissive: 0x440011 }));
+            obs.position.set(lanes[l], 0.6, 200 + (Math.random()*10)); obs.lane = l; scene.add(obs); objects.push(obs);
+            if(used.length >= 3) break; 
         }
     }
 
     let timer = 0;
     function animate() {
         requestAnimationFrame(animate);
-
         if (gameState === 'HUB') {
-            playerCar.position.set(0,0,0); playerCar.rotation.y += 0.005;
-            camera.position.set(6, 4, -8); camera.lookAt(0,0,0); enemyCar.position.y = -100; 
-            starsMesh.rotation.y += 0.001; // Stars gently rotate in hub
-        } 
-        else if (gameState === 'PLAYING') {
+            playerCar.position.set(0,0,0); playerCar.rotation.y += 0.005; camera.position.set(6, 4, -8); camera.lookAt(0,0,0); enemyCar.position.y = -100; starsMesh.rotation.y += 0.0005;
+        } else if (gameState === 'PLAYING') {
             playerCar.rotation.y = 0; enemyCar.position.y = 0;
+            playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed; playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.06;
             
-            // Steering
-            playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed;
-            playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.06;
-            
-            // Enemy AI Dodge
-            enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.08;
+            // AI
+            enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.1;
             let danger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 60);
-            if(danger) { if(enemyLane > 0 && Math.random() > 0.1) enemyLane--; else if (enemyLane < 3) enemyLane++; }
+            if(danger) { 
+                let lSafe = enemyLane > 0 && !objects.some(o => o.lane === enemyLane-1 && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 60);
+                let rSafe = enemyLane < 3 && !objects.some(o => o.lane === enemyLane+1 && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 60);
+                if(lSafe && rSafe) { if(playerLane < enemyLane) enemyLane--; else enemyLane++; } else if(lSafe) enemyLane--; else if(rSafe) enemyLane++;
+            }
 
-            // Camera Warp
             if(camera.fov < 75 + (baseSpeed * 30)) { camera.fov += 0.05; camera.updateProjectionMatrix(); }
+            roadLines.forEach(l => { l.position.z -= baseSpeed * 3; if(l.position.z < -10) l.position.z = 200; });
 
-            // Particle Starfield Speed Effect
-            const positions = starsMesh.geometry.attributes.position.array;
-            for(let i=2; i<starsCount*3; i+=3) {
-                positions[i] -= baseSpeed * 10; // Stars fly towards camera
-                if(positions[i] < -50) positions[i] = 200; // Reset star position
-            }
-            starsMesh.geometry.attributes.position.needsUpdate = true;
-
-            // Move Lane Lines
-            roadLines.forEach(line => {
-                line.position.z -= baseSpeed * 3;
-                if(line.position.z < -10) line.position.z = 200;
-            });
-
-            // Rebalanced Difficulty Curve
-            baseSpeed += 0.00003; // Extremely slow acceleration
-            score += (baseSpeed * scoreMultiplier * 5); 
+            baseSpeed += 0.00003; score += (baseSpeed * scoreMultiplier * 5); 
             document.getElementById('score-display').innerText = Math.floor(score);
+            
+            let diff = document.getElementById('difficulty-display'); let sRate = 4.5; let mChance = 0;
+            if(score < 600) { diff.innerText = "EASY"; diff.style.color = "#00ffcc"; sRate = 4.5; }
+            else if(score < 1800) { diff.innerText = "MEDIUM"; diff.style.color = "#ffd700"; sRate = 3.0; mChance = 0.1; }
+            else { diff.innerText = "HARD"; diff.style.color = "#ff0055"; sRate = 1.4; mChance = 0.5; }
 
-            let diffText = document.getElementById('difficulty-display');
-            let spawnRate = 4.5; let multiSpawnChance = 0;
+            timer += baseSpeed; if(timer > sRate) { spawnObstacles((Math.random() < mChance) ? 2 : 1); timer = 0; }
 
-            if(score < 600) {
-                diffText.innerText = "EASY"; diffText.style.color = "#00ffcc";
-                spawnRate = 4.5; // Very relaxed
-            } else if(score < 1800) {
-                diffText.innerText = "MEDIUM"; diffText.style.color = "#ffd700";
-                spawnRate = 3.0; multiSpawnChance = 0.1; // Only 10% chance for 2 blocks
-            } else {
-                diffText.innerText = "HARD"; diffText.style.color = "#ff0055";
-                spawnRate = 1.2; multiSpawnChance = 0.5; // Same hard intensity
-            }
-
-            timer += baseSpeed; 
-            if(timer > spawnRate) { 
-                let count = (Math.random() < multiSpawnChance) ? 2 : 1;
-                spawnObstacles(count); timer = 0; 
-            }
-
-            // Collisions
-            objects.forEach((obj, index) => {
-                obj.position.z -= baseSpeed * 2.8; 
-                if(obj.position.z < -10) { scene.remove(obj); objects.splice(index, 1); }
-                if(Math.abs(playerCar.position.x - obj.position.x) < 1.6 && Math.abs(playerCar.position.z - obj.position.z) < 2.5) gameOver();
+            objects.forEach((o, i) => {
+                o.position.z -= baseSpeed * 2.8; if(o.position.z < -10) { scene.remove(o); objects.splice(i, 1); }
+                if(Math.abs(playerCar.position.x - o.position.x) < 1.6 && Math.abs(playerCar.position.z - o.position.z) < 2.5) {
+                    playSound('crash');
+                    gameState = 'HUB'; 
+                    let r = Math.floor(score / 50); coins += r; localStorage.setItem('dkCoins', coins); loadSaveData();
+                    document.getElementById('sidebar').style.display = 'block'; document.getElementById('hud').style.display = 'none'; document.getElementById('mobile-controls').style.display = 'none'; 
+                    document.getElementById('sidebar').innerHTML = `<h2 style="color:#ff0055; margin-top:0;">CRASHED!</h2><p>Score: ${Math.floor(score)}</p><p style="color:#ffd700;">Earned: +${r} Coins</p><button class="play-btn" onclick="location.reload()">Back to Garage</button>`;
+                }
             });
         }
         renderer.render(scene, camera);
     }
-
-    function gameOver() {
-        gameState = 'HUB'; 
-        let reward = Math.floor(score / 50); coins += reward; updateUI();
-        
-        document.getElementById('sidebar').style.display = 'block';
-        document.getElementById('hud').style.display = 'none';
-        document.getElementById('mobile-controls').style.display = 'none'; 
-        document.getElementById('sidebar').innerHTML = `
-            <h2 style="color:#ff0055; margin-top:0;">CRASHED!</h2>
-            <p>Score: ${Math.floor(score)}</p>
-            <p style="color:#ffd700;">Earned: +${reward} Coins</p>
-            <button class="play-btn" onclick="location.reload()">Back to Garage</button>
-        `;
-    }
-
     window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
     animate();
 </script>
