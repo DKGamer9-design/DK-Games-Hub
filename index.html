@@ -3,21 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DK Games Hub - Advanced AI Edition</title>
+    <title>DK Games Hub - Street Realism</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --neon: #00ffcc; --glass: rgba(5, 10, 15, 0.85); }
-        body { margin: 0; overflow: hidden; background: #02050a; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; }
+        body { margin: 0; overflow: hidden; background: #010205; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; }
         
-        #header { position: absolute; top: 0; width: 100%; padding: 15px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 204, 0.2); display: flex; justify-content: space-between; align-items: center; z-index: 20; box-sizing: border-box; }
-        .title { font-size: 22px; font-weight: 900; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
+        #header { position: absolute; top: 0; width: 100%; padding: 15px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; z-index: 20; box-sizing: border-box; }
+        .title { font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 0 10px #fff; text-transform: uppercase; letter-spacing: 2px; }
         .economy { font-size: 18px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
         
-        #sidebar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 380px; background: var(--glass); backdrop-filter: blur(20px); padding: 25px; border-radius: 15px; border: 1px solid var(--neon); box-shadow: 0 0 40px rgba(0, 255, 204, 0.15); z-index: 20; text-align: center; }
+        #sidebar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 380px; background: var(--glass); backdrop-filter: blur(20px); padding: 25px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); z-index: 20; text-align: center; }
         
         .tab-header { display: flex; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .tab-btn { flex: 1; background: transparent; border: none; color: #666; font-size: 18px; font-weight: bold; text-transform: uppercase; padding: 10px; cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent; }
-        .tab-btn.active { color: var(--neon); border-bottom: 2px solid var(--neon); text-shadow: 0 0 10px rgba(0,255,204,0.5); }
+        .tab-btn.active { color: #fff; border-bottom: 2px solid #fff; text-shadow: 0 0 10px rgba(255,255,255,0.5); }
         .tab-content { display: none; animation: fadeIn 0.3s; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -25,22 +25,21 @@
         h3 { margin-top: 0; font-size: 16px; color: #aaa; margin-bottom: 15px; }
         
         .upgrade-btn { width: 100%; padding: 12px; margin: 6px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.3s; }
-        .upgrade-btn:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+        .upgrade-btn:hover { background: #fff; color: black; box-shadow: 0 0 15px #fff; }
         .upgrade-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
-        .play-btn { width: 100%; padding: 15px; margin: 8px 0; border-radius: 8px; background: rgba(0, 255, 204, 0.15); border: 1px solid var(--neon); color: var(--neon); font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer; box-shadow: inset 0 0 10px rgba(0,255,204,0.2); transition: 0.3s; }
-        .play-btn:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
+        .play-btn { width: 100%; padding: 15px; margin: 8px 0; border-radius: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer; box-shadow: inset 0 0 10px rgba(255,255,255,0.2); transition: 0.3s; }
+        .play-btn:hover { background: #fff; color: black; box-shadow: 0 0 20px #fff; }
         
         .play-btn-alt { background: rgba(255, 0, 85, 0.15); border-color: #ff0055; color: #ff0055; box-shadow: inset 0 0 10px rgba(255,0,85,0.2); }
         .play-btn-alt:hover { background: #ff0055; color: white; box-shadow: 0 0 20px #ff0055; }
-        .locked-btn { border-color: #555; color: #555; background: transparent; cursor: not-allowed; box-shadow: none; }
 
         #hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); text-align: center; display: none; z-index: 10; width: 100%; pointer-events: none; }
         #score-display { font-size: 42px; font-weight: 900; color: white; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
-        #difficulty-display { font-size: 18px; font-weight: bold; color: #00ffcc; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
+        #difficulty-display { font-size: 18px; font-weight: bold; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
         
         #mobile-controls { position: absolute; bottom: 30px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 50; }
-        .steer-btn { width: 85px; height: 85px; background: rgba(0, 255, 204, 0.1); border: 2px solid rgba(0,255,204,0.5); border-radius: 50%; color: var(--neon); font-size: 30px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(0, 255, 204, 0.2); backdrop-filter: blur(5px); }
+        .steer-btn { width: 85px; height: 85px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; color: #fff; font-size: 30px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); }
         
         #reflex-game { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; z-index: 30; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; }
         #reflex-text { font-size: 30px; font-weight: bold; pointer-events: none; text-align: center; padding: 20px; }
@@ -69,7 +68,6 @@
         <h3>Select a Game Mode</h3>
         <button class="play-btn" onclick="startRacingGame()">🏎️ 3D Street Racing</button>
         <button class="play-btn play-btn-alt" onclick="startReflexGame()">⚡ Reflex Master</button>
-        <button class="play-btn locked-btn" onclick="alert('Coming Soon!')">🔒 Alphabet Maze (Locked)</button>
     </div>
 </div>
 
@@ -152,7 +150,7 @@
     let playerLane = 1; let enemyLane = 2; const lanes = [-4.5, -1.5, 1.5, 4.5];
     let objects = []; let roadLines = [];
 
-    const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x02050a, 0.012);
+    const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x010205, 0.012);
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 400);
     
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -160,53 +158,61 @@
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
     renderer.toneMapping = THREE.ACESFilmicToneMapping; 
-    renderer.toneMappingExposure = 1.2;
+    renderer.toneMappingExposure = 1.3;
     document.body.appendChild(renderer.domElement);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.2));
-    const moon = new THREE.DirectionalLight(0xaaccff, 1.5); 
+    const moon = new THREE.DirectionalLight(0xffffff, 1.5); 
     moon.position.set(20, 50, -20); 
     moon.castShadow = true; 
     moon.shadow.mapSize.width = 2048; 
     moon.shadow.mapSize.height = 2048;
     scene.add(moon);
 
-    // Front View Studio Lighting (Illuminates the car's front in HUB)
-    const frontLight = new THREE.SpotLight(0xffffff, 3.0, 50, 0.6, 0.5, 1);
+    const frontLight = new THREE.SpotLight(0xffffff, 4.0, 50, 0.6, 0.5, 1);
     frontLight.position.set(0, 3, -10);
     frontLight.target.position.set(0, 0, 0);
-    scene.add(frontLight);
-    scene.add(frontLight.target);
+    scene.add(frontLight); scene.add(frontLight.target);
 
     const starsGeo = new THREE.BufferGeometry(); const posArray = new Float32Array(400 * 3);
     for(let i=0; i<1200; i+=3) { posArray[i] = (Math.random()-0.5)*400; posArray[i+1] = (Math.random()*150)+20; posArray[i+2] = (Math.random()-0.5)*400; }
     starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
     const starsMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.8, color: 0xffffff, transparent: true, opacity: 0.8})); scene.add(starsMesh);
 
-    const road = new THREE.Mesh(new THREE.PlaneGeometry(16, 600), new THREE.MeshStandardMaterial({ color: 0x050508, roughness: 0.3, metalness: 0.9 }));
+    // Procedural Asphalt Texture
+    const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
+    const ctx = canvas.getContext('2d');
+    for(let i=0; i<5000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#111' : '#222'; ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2); }
+    const roadTex = new THREE.CanvasTexture(canvas); roadTex.wrapS = THREE.RepeatWrapping; roadTex.wrapT = THREE.RepeatWrapping; roadTex.repeat.set(1, 40);
+
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(16, 600), new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.6, metalness: 0.2 }));
     road.rotation.x = -Math.PI / 2; road.receiveShadow = true; scene.add(road);
 
-    const lineMat = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.5 });
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.7 });
     for(let i=0; i<30; i++) { [-1.5, 1.5].forEach(x => { let line = new THREE.Mesh(new THREE.PlaneGeometry(0.2, 5), lineMat); line.rotation.x = -Math.PI/2; line.position.set(lanes[1]+x, 0.02, 100-(i*15)); scene.add(line); roadLines.push(line); }); }
 
-    function createCar(mainColor, isPlayer, underglowColor) {
+    function createCar(mainColor) {
         const group = new THREE.Group(); const chassisNode = new THREE.Group(); 
-        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 1.0, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05 }); 
+        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 0.9, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.1 }); 
         
         const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4.2), pMat); chassis.position.y = 0.5; chassis.castShadow = true; chassisNode.add(chassis);
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202, roughness: 0.0, metalness: 1.0})); cabin.position.set(0, 1.07, -0.2); cabin.castShadow = true; chassisNode.add(cabin);
         const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat); spoiler.position.set(0, 1.2, -1.9); chassisNode.add(spoiler);
         
-        const hColor = isPlayer ? 0x00ffff : 0xffaa00;
-        const h1 = new THREE.SpotLight(hColor, 5, 100, 0.3, 0.8, 1); h1.position.set(-0.7, 0.6, 2.1); h1.target.position.set(-0.7, 0, 25); chassisNode.add(h1); chassisNode.add(h1.target);
-        const h2 = new THREE.SpotLight(hColor, 5, 100, 0.3, 0.8, 1); h2.position.set(0.7, 0.6, 2.1); h2.target.position.set(0.7, 0, 25); chassisNode.add(h2); chassisNode.add(h2.target);
+        // Pure White LED Headlights
+        const h1 = new THREE.SpotLight(0xffffff, 6, 120, 0.4, 0.8, 1); h1.position.set(-0.7, 0.6, 2.1); h1.target.position.set(-0.7, 0, 25); chassisNode.add(h1); chassisNode.add(h1.target);
+        const h2 = new THREE.SpotLight(0xffffff, 6, 120, 0.4, 0.8, 1); h2.position.set(0.7, 0.6, 2.1); h2.target.position.set(0.7, 0, 25); chassisNode.add(h2); chassisNode.add(h2.target);
         
-        const underglow = new THREE.PointLight(underglowColor, 4, 8); underglow.position.set(0, 0.2, 0); chassisNode.add(underglow);
+        // Emissive Glowing Red Taillights
+        const tLightMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0});
+        const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), tLightMat); t1.position.set(-0.7, 0.6, -2.1); chassisNode.add(t1);
+        const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), tLightMat); t2.position.set(0.7, 0.6, -2.1); chassisNode.add(t2);
+
         group.add(chassisNode); group.chassisNode = chassisNode; return group;
     }
 
-    const playerCar = createCar(0xcc0000, true, 0x00ffcc); scene.add(playerCar);
-    const enemyCar = createCar(0x001144, false, 0xff5500); scene.add(enemyCar);
+    const playerCar = createCar(0xcc0000); scene.add(playerCar); // Player Red
+    const enemyCar = createCar(0x001144); scene.add(enemyCar); // Enemy Dark Blue
 
     function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
     function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
@@ -229,7 +235,7 @@
         let used = [];
         for(let i=0; i<count; i++) {
             let l; do { l = Math.floor(Math.random() * 4); } while(used.includes(l)); used.push(l);
-            const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0x330011, roughness: 0.1, metalness: 0.8 }));
+            const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8 })); // Sleek metallic blocks
             obs.position.set(lanes[l], 0.6, 200 + (Math.random()*15)); obs.castShadow = true; obs.lane = l; scene.add(obs); objects.push(obs);
             if(used.length >= 3) break; 
         }
@@ -241,53 +247,49 @@
 
         if (gameState === 'HUB') {
             playerCar.position.set(0,0,0); playerCar.rotation.y += 0.005; camera.position.set(6, 4, -8); camera.lookAt(0,0,0); enemyCar.position.y = -100; starsMesh.rotation.y += 0.0005;
-            frontLight.intensity = 3.0; // Turn on front studio light in hub
+            frontLight.intensity = 4.0;
         } else if (gameState === 'PLAYING') {
-            frontLight.intensity = 0; // Turn off studio light during gameplay
-            
+            frontLight.intensity = 0; 
             playerCar.rotation.y = 0; enemyCar.position.y = 0;
             
             playerCar.chassisNode.position.y = Math.sin(clock * 15) * 0.03; enemyCar.chassisNode.position.y = Math.cos(clock * 14) * 0.03;
             playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed; playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.08; 
             
-            // --- ADVANCED REALISTIC AI AVOIDANCE ---
-            enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.15; 
+            // --- ENHANCED COMPETITIVE AI ---
+            // Faster lateral movement (0.25 vs 0.15)
+            enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.25; 
             enemyCar.rotation.z = (enemyCar.position.x - lanes[enemyLane]) * -0.06;
             
             enemyTargetZ = 6 + Math.sin(clock * 0.8) * 4; 
             enemyCar.position.z += (enemyTargetZ - enemyCar.position.z) * 0.05;
 
-            // Look ahead to find obstacles in current lane
-            let myDanger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 80);
+            // Increased scanning distance (120 units ahead)
+            let myDanger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 120);
             
             if(myDanger) { 
-                // AI Evaluate Left and Right Lanes for most open space
-                let leftLane = enemyLane - 1;
-                let rightLane = enemyLane + 1;
+                // Scan all available lanes, pick the one with the furthest obstacle
+                let laneDistances = [0,1,2,3].map(l => {
+                    let obj = objects.find(o => o.lane === l && o.position.z > enemyCar.position.z);
+                    return { lane: l, dist: obj ? obj.position.z : Infinity };
+                });
                 
-                let leftDist = -1; let rightDist = -1;
+                // Sort by distance (descending) so safest lane is first
+                laneDistances.sort((a,b) => b.dist - a.dist);
                 
-                if (leftLane >= 0) {
-                    let oLeft = objects.find(o => o.lane === leftLane && o.position.z > enemyCar.position.z);
-                    leftDist = oLeft ? oLeft.position.z : Infinity;
+                // Prioritize the safest lane that is also closest to current position to avoid huge jumps
+                let bestLane = laneDistances[0].lane;
+                if(laneDistances[0].dist === Infinity && laneDistances[1].dist === Infinity) {
+                     // If multiple are completely safe, pick one closer to player to block
+                     bestLane = Math.abs(laneDistances[0].lane - playerLane) < Math.abs(laneDistances[1].lane - playerLane) ? laneDistances[0].lane : laneDistances[1].lane;
                 }
-                if (rightLane <= 3) {
-                    let oRight = objects.find(o => o.lane === rightLane && o.position.z > enemyCar.position.z);
-                    rightDist = oRight ? oRight.position.z : Infinity;
-                }
-
-                // Choose the lane with the furthest obstacle
-                if (leftDist > rightDist && leftDist > enemyCar.position.z + 20) {
-                    enemyLane = leftLane;
-                } else if (rightDist > leftDist && rightDist > enemyCar.position.z + 20) {
-                    enemyLane = rightLane;
-                }
+                enemyLane = bestLane;
+                
             } else if(enemyCar.position.z > playerCar.position.z + 2 && Math.random() < 0.01) {
-                // Aggressive block if clear
                 enemyLane = playerLane; 
             }
 
             if(camera.fov < 75 + (baseSpeed * 35)) { camera.fov += 0.05; camera.updateProjectionMatrix(); }
+            roadTex.offset.y -= baseSpeed * 2; // Move road texture
             roadLines.forEach(l => { l.position.z -= baseSpeed * 3; if(l.position.z < -10) l.position.z = 200; });
 
             baseSpeed += 0.00003; score += (baseSpeed * scoreMultiplier * 5); document.getElementById('score-display').innerText = Math.floor(score);
