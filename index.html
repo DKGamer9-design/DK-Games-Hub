@@ -2,26 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DK Games Hub - 3D Racing</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>DK Games Hub - Ultimate</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --neon: #00ffcc; --glass: rgba(10, 10, 15, 0.85); }
-        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; }
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; transition: background 0.5s; }
         
-        /* UI Elements */
-        #header { position: absolute; top: 0; width: 100%; padding: 15px 30px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 10; }
+        /* UI Hub */
+        #header { position: absolute; top: 0; width: 100%; padding: 15px 30px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
         .title { font-size: 28px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); text-transform: uppercase; }
         .economy { font-size: 20px; font-weight: bold; color: #ffd700; }
         
-        #menu-ui { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); background: var(--glass); padding: 40px; border-radius: 15px; border: 1px solid var(--neon); box-shadow: 0 0 30px rgba(0, 255, 204, 0.2); text-align: center; z-index: 20; width: 350px; }
-        h2 { color: white; margin-top: 0; font-size: 24px; }
+        #sidebar { position: absolute; left: 20px; top: 80px; width: 300px; background: var(--glass); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 20; max-height: 80vh; overflow-y: auto; }
+        h3 { margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--neon); }
+        button { width: 100%; padding: 12px; margin: 6px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); border-color: var(--neon); }
+        .play-btn { background: rgba(0, 255, 204, 0.2); border-color: var(--neon); color: var(--neon); font-size: 18px; text-transform: uppercase; padding: 15px; }
         
-        button { width: 100%; padding: 15px; margin: 10px 0; border-radius: 8px; border: 1px solid var(--neon); background: rgba(0, 255, 204, 0.1); color: var(--neon); font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
-        button:hover { background: var(--neon); color: black; box-shadow: 0 0 20px var(--neon); }
-
-        #hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 2px 2px 4px black; display: none; z-index: 10; }
-        #controls-hint { position: absolute; bottom: 30px; width: 100%; text-align: center; font-size: 18px; color: rgba(255,255,255,0.5); display: none; z-index: 10; }
+        #achievements { position: absolute; bottom: 20px; right: 20px; background: var(--glass); padding: 15px; border-radius: 8px; border: 1px solid #ffd700; z-index: 20; backdrop-filter: blur(10px); }
+        
+        /* In-Game UI */
+        #hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 2px 2px 5px black; display: none; z-index: 10; }
+        #touch-zones { position: absolute; bottom: 0; width: 100%; height: 100%; display: none; z-index: 5; }
+        .touch-half { width: 50%; height: 100%; float: left; }
     </style>
 </head>
 <body>
@@ -31,203 +35,117 @@
     <div class="economy">Coins: <span id="coin-display">350</span></div>
 </div>
 
-<div id="menu-ui">
-    <h2>Main Garage</h2>
-    <p style="color: #ccc; margin-bottom: 25px;">Ready your car. Dodge obstacles. Survive.</p>
-    <button onclick="startGame()">Start 3D Infinite Race</button>
+<div id="sidebar">
+    <h3>2017 Swift Garage</h3>
+    <button onclick="buyMod(50, 'Sport Alloys')">Sport Alloys (-50 Coins)</button>
+    <button onclick="buyMod(100, 'Ambient Lighting')">Ambient Light (-100 Coins)</button>
+    <button onclick="buyMod(75, 'Matte Black')">Matte Black Wrap (-75 Coins)</button>
+
+    <h3 style="margin-top: 20px;">Themes</h3>
+    <button onclick="buyTheme(30, 'neon')">Cyberpunk Neon (-30 Coins)</button>
+    <button onclick="buyTheme(30, 'daylight')">Clear Daylight (-30 Coins)</button>
+
+    <h3 style="margin-top: 20px;">Select Game</h3>
+    <button class="play-btn" onclick="startGame(1)">1. 3D Pro Racing</button>
+    <button onclick="alert('Slot Open for Future Games')">2. [Slot Open]</button>
+    <button onclick="alert('Slot Open for Future Games')">3. [Slot Open]</button>
+    <button onclick="alert('Slot Open for Future Games')">4. [Slot Open]</button>
 </div>
 
+<div id="achievements">Rank: <span id="rank-display" style="color: #00ffcc;">Beginner</span></div>
+
 <div id="hud">Score: <span id="score-display">0</span></div>
-<div id="controls-hint">&larr; Use Left and Right Arrow Keys to Switch Lanes &rarr;</div>
+<div id="touch-zones">
+    <div class="touch-half" id="left-zone"></div>
+    <div class="touch-half" id="right-zone"></div>
+</div>
 
 <script>
-    // --- 1. CORE VARIABLES ---
-    let coins = 350;
-    let gameState = 'MENU'; // 'MENU' or 'PLAYING'
-    let score = 0;
-    let gameSpeed = 0.5;
-    let currentLane = 1; // Lanes: 0, 1, 2, 3
-    const laneXPositions = [-4.5, -1.5, 1.5, 4.5]; // 4 distinct lanes
-    let obstacles = [];
-    let spawnTimer = 0;
+    // --- 1. STATE & ECONOMY ---
+    let gameState = 'HUB'; 
+    let coins = 350; let score = 0; let gameSpeed = 0.6;
+    let playerLane = 1; let enemyLane = 2; const lanes = [-4.5, -1.5, 1.5, 4.5];
+    let objects = []; let environment = [];
 
-    // UI Elements
-    const menuUI = document.getElementById('menu-ui');
-    const hud = document.getElementById('hud');
-    const controlsHint = document.getElementById('controls-hint');
-    const scoreDisplay = document.getElementById('score-display');
-    const coinDisplay = document.getElementById('coin-display');
+    function updateUI() { document.getElementById('coin-display').innerText = coins; }
 
-    // --- 2. THREE.JS SETUP ---
+    function buyMod(cost, mod) {
+        if(coins >= cost) { coins -= cost; updateUI(); applyModification(mod); }
+        else alert("Not enough coins!");
+    }
+
+    function buyTheme(cost, theme) {
+        if(coins >= cost) { coins -= cost; updateUI(); changeTheme(theme); }
+        else alert("Not enough coins!");
+    }
+
+    // --- 2. ADVANCED 3D ENGINE ---
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050505, 0.015); // Gives the illusion of objects appearing from distance
+    scene.background = new THREE.Color(0x050510);
+    scene.fog = new THREE.Fog(0x050510, 20, 120);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
-    // Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    dirLight.position.set(10, 20, 10);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
+    // Dynamic Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    sun.position.set(-20, 30, -10); sun.castShadow = true;
+    scene.add(sun);
 
-    // --- 3. GAME OBJECTS ---
-    // The Infinite Road (Grid)
-    const gridHelper = new THREE.GridHelper(200, 50, 0x00ffcc, 0x222222);
-    gridHelper.position.y = -1;
-    scene.add(gridHelper);
+    // Environment
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 300), new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 }));
+    road.rotation.x = -Math.PI / 2; road.receiveShadow = true;
+    scene.add(road);
 
-    // Player Car (Custom Swift placeholder)
-    const carGroup = new THREE.Group();
-    const bodyGeo = new THREE.BoxGeometry(2, 1, 4);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0088ff, roughness: 0.3 });
-    const playerCar = new THREE.Mesh(bodyGeo, bodyMat);
-    playerCar.castShadow = true;
-    playerCar.position.y = -0.5;
-    carGroup.add(playerCar);
-    scene.add(carGroup);
+    const grass = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x0a1a0a }));
+    grass.rotation.x = -Math.PI / 2; grass.position.y = -0.1; grass.receiveShadow = true;
+    scene.add(grass);
 
-    // Initial Camera Position for Menu
-    camera.position.set(6, 4, 8);
-    camera.lookAt(0, 0, 0);
-
-    // --- 4. GAME CONTROLS & LOGIC ---
-    document.addEventListener('keydown', (e) => {
-        if (gameState !== 'PLAYING') return;
-        if (e.key === 'ArrowLeft' && currentLane > 0) currentLane--;
-        if (e.key === 'ArrowRight' && currentLane < 3) currentLane++;
-    });
-
-    function startGame() {
-        // Reset Variables
-        gameState = 'PLAYING';
-        score = 0;
-        gameSpeed = 0.5;
-        currentLane = 1;
+    // --- 3. GRAPHICALLY ENHANCED CAR BUILDER ---
+    let playerMaterial = new THREE.MeshStandardMaterial({ color: 0xcc0000, metalness: 0.8, roughness: 0.2 });
+    
+    function createCar(material, isPlayer) {
+        const group = new THREE.Group();
+        const chassis = new THREE.Mesh(new THREE.BoxGeometry(2, 0.6, 4), material);
+        chassis.position.y = 0.5; chassis.castShadow = true; group.add(chassis);
         
-        // Clear old obstacles
-        obstacles.forEach(obs => scene.remove(obs));
-        obstacles = [];
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 2), new THREE.MeshStandardMaterial({color: 0x050505, roughness: 0.1}));
+        cabin.position.set(0, 1.05, -0.2); cabin.castShadow = true; group.add(cabin);
 
-        // UI Updates
-        menuUI.style.display = 'none';
-        hud.style.display = 'block';
-        controlsHint.style.display = 'block';
-
-        // Move Camera behind the car for racing view
-        camera.position.set(0, 5, 12);
-        camera.lookAt(0, 0, -20);
-        
-        // Reset Car Position
-        carGroup.position.set(laneXPositions[currentLane], 0, 0);
-        carGroup.rotation.y = 0;
-    }
-
-    function gameOver() {
-        gameState = 'MENU';
-        
-        // Calculate Coin Reward (1 coin per 100 score)
-        let reward = Math.floor(score / 100);
-        coins += reward;
-        coinDisplay.innerText = coins;
-
-        // Reset UI
-        menuUI.style.display = 'block';
-        hud.style.display = 'none';
-        controlsHint.style.display = 'none';
-        
-        // Move camera back to showcase mode
-        camera.position.set(6, 4, 8);
-        camera.lookAt(0, 0, 0);
-
-        // Update Menu Text based on performance
-        menuUI.innerHTML = `
-            <h2>CRASHED!</h2>
-            <p style="color: #ff4444; font-size: 20px;">Score: ${Math.floor(score)}</p>
-            <p style="color: #ffd700;">Earned: +${reward} Coins</p>
-            <button onclick="startGame()">Race Again</button>
-        `;
-    }
-
-    function spawnObstacle() {
-        // Create an obstacle (Competitor Car / Block)
-        const obsGeo = new THREE.BoxGeometry(2, 1, 4);
-        const obsMat = new THREE.MeshStandardMaterial({ color: 0xff0044 });
-        const obstacle = new THREE.Mesh(obsGeo, obsMat);
-        
-        // Pick a random lane
-        const randomLane = Math.floor(Math.random() * 4);
-        obstacle.position.set(laneXPositions[randomLane], -0.5, -100); // Start far away
-        obstacle.castShadow = true;
-        
-        scene.add(obstacle);
-        obstacles.push(obstacle);
-    }
-
-    // --- 5. MAIN RENDER LOOP ---
-    function animate() {
-        requestAnimationFrame(animate);
-
-        if (gameState === 'MENU') {
-            // Showcase Spin
-            carGroup.rotation.y += 0.005;
-        } 
-        else if (gameState === 'PLAYING') {
-            // 1. Smoothly switch lanes (Interpolation)
-            const targetX = laneXPositions[currentLane];
-            carGroup.position.x += (targetX - carGroup.position.x) * 0.15;
-            
-            // Tilt car slightly when turning
-            carGroup.rotation.z = (carGroup.position.x - targetX) * 0.05;
-
-            // 2. Increase Speed & Score
-            gameSpeed += 0.0005; // Gets faster every frame
-            score += gameSpeed * 2;
-            scoreDisplay.innerText = Math.floor(score);
-
-            // 3. Move the Grid (creates illusion of speed)
-            gridHelper.position.z = (gridHelper.position.z + gameSpeed) % 10;
-
-            // 4. Handle Obstacles
-            spawnTimer -= gameSpeed;
-            if (spawnTimer <= 0) {
-                spawnObstacle();
-                spawnTimer = 40; // Reset timer
-            }
-
-            for (let i = obstacles.length - 1; i >= 0; i--) {
-                let obs = obstacles[i];
-                obs.position.z += gameSpeed; // Move towards player
-
-                // Collision Detection (Hitbox check)
-                if (Math.abs(carGroup.position.x - obs.position.x) < 1.8 && 
-                    Math.abs(carGroup.position.z - obs.position.z) < 3.5) {
-                    gameOver();
-                }
-
-                // Remove obstacle if it passes the camera
-                if (obs.position.z > 15) {
-                    scene.remove(obs);
-                    obstacles.splice(i, 1);
-                }
-            }
+        // Headlights (PointLights)
+        if(isPlayer) {
+            const hLight1 = new THREE.PointLight(0xffffff, 1, 20); hLight1.position.set(-0.6, 0.6, 2.5); group.add(hLight1);
+            const hLight2 = new THREE.PointLight(0xffffff, 1, 20); hLight2.position.set(0.6, 0.6, 2.5); group.add(hLight2);
         }
 
-        renderer.render(scene, camera);
+        return group;
     }
 
-    // Handle Resize
-    window.addEventListener('resize', () => {
-        camera.aspect = window.innerWidth / window.innerHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-    });
+    const playerCar = createCar(playerMaterial, true); scene.add(playerCar);
+    const enemyCar = createCar(new THREE.MeshStandardMaterial({color: 0x0044cc, metalness: 0.8, roughness: 0.2}), false); scene.add(enemyCar);
 
-    animate();
-</script>
-</body>
-</html>
+    // Modifications & Themes
+    function applyModification(mod) {
+        if(mod === 'Matte Black') { playerMaterial.color.setHex(0x111111); playerMaterial.roughness = 0.9; playerMaterial.metalness = 0.1; }
+        if(mod === 'Ambient Lighting') { const neon = new THREE.PointLight(0x00ffcc, 2, 5); neon.position.y = 1; playerCar.add(neon); }
+        if(mod === 'Sport Alloys') alert("Alloys Installed! Grip increased.");
+    }
+
+    function changeTheme(theme) {
+        if(theme === 'daylight') {
+            scene.background.setHex(0x87CEEB); scene.fog.color.setHex(0x87CEEB);
+            grass.material.color.setHex(0x228B22); sun.intensity = 1.2;
+        }
+        if(theme === 'neon') {
+            scene.background.setHex(0x050015); scene.fog.color.setHex(0x050015);
+            grass.material.color.setHex(0x0a001a); sun.intensity = 0.5;
+        }
+    }
+
+    // --- 4. GAME MECHANICS ---
+    function moveLeft() { if(gameState === 'PLAYING' &&
