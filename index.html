@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DK Games Hub - MAX Graphics</title>
+    <title>DK Games Hub - Advanced AI Edition</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --neon: #00ffcc; --glass: rgba(5, 10, 15, 0.85); }
@@ -155,12 +155,11 @@
     const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(0x02050a, 0.012);
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 400);
     
-    // MAX GRAPHICS: Tone Mapping for Cinematic Realism
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight); 
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Ultra-smooth shadows
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; // Photorealistic color grading
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; 
     renderer.toneMappingExposure = 1.2;
     document.body.appendChild(renderer.domElement);
 
@@ -168,16 +167,22 @@
     const moon = new THREE.DirectionalLight(0xaaccff, 1.5); 
     moon.position.set(20, 50, -20); 
     moon.castShadow = true; 
-    moon.shadow.mapSize.width = 2048; // MAX Shadow Resolution
+    moon.shadow.mapSize.width = 2048; 
     moon.shadow.mapSize.height = 2048;
     scene.add(moon);
+
+    // Front View Studio Lighting (Illuminates the car's front in HUB)
+    const frontLight = new THREE.SpotLight(0xffffff, 3.0, 50, 0.6, 0.5, 1);
+    frontLight.position.set(0, 3, -10);
+    frontLight.target.position.set(0, 0, 0);
+    scene.add(frontLight);
+    scene.add(frontLight.target);
 
     const starsGeo = new THREE.BufferGeometry(); const posArray = new Float32Array(400 * 3);
     for(let i=0; i<1200; i+=3) { posArray[i] = (Math.random()-0.5)*400; posArray[i+1] = (Math.random()*150)+20; posArray[i+2] = (Math.random()-0.5)*400; }
     starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
     const starsMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.8, color: 0xffffff, transparent: true, opacity: 0.8})); scene.add(starsMesh);
 
-    // Highly reflective dark asphalt
     const road = new THREE.Mesh(new THREE.PlaneGeometry(16, 600), new THREE.MeshStandardMaterial({ color: 0x050508, roughness: 0.3, metalness: 0.9 }));
     road.rotation.x = -Math.PI / 2; road.receiveShadow = true; scene.add(road);
 
@@ -186,7 +191,7 @@
 
     function createCar(mainColor, isPlayer, underglowColor) {
         const group = new THREE.Group(); const chassisNode = new THREE.Group(); 
-        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 1.0, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05 }); // Perfect car paint
+        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 1.0, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05 }); 
         
         const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4.2), pMat); chassis.position.y = 0.5; chassis.castShadow = true; chassisNode.add(chassis);
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202, roughness: 0.0, metalness: 1.0})); cabin.position.set(0, 1.07, -0.2); cabin.castShadow = true; chassisNode.add(cabin);
@@ -217,7 +222,6 @@
         
         camera.position.set(0, 5, -9); camera.lookAt(0, 1, 15); 
         playerCar.position.set(lanes[playerLane], 0, 5); 
-        // Force Enemy to spawn strictly next to the player in view
         enemyCar.position.set(lanes[enemyLane], 0, 10); 
     }
 
@@ -237,25 +241,51 @@
 
         if (gameState === 'HUB') {
             playerCar.position.set(0,0,0); playerCar.rotation.y += 0.005; camera.position.set(6, 4, -8); camera.lookAt(0,0,0); enemyCar.position.y = -100; starsMesh.rotation.y += 0.0005;
+            frontLight.intensity = 3.0; // Turn on front studio light in hub
         } else if (gameState === 'PLAYING') {
+            frontLight.intensity = 0; // Turn off studio light during gameplay
+            
             playerCar.rotation.y = 0; enemyCar.position.y = 0;
             
             playerCar.chassisNode.position.y = Math.sin(clock * 15) * 0.03; enemyCar.chassisNode.position.y = Math.cos(clock * 14) * 0.03;
             playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed; playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.08; 
             
-            // FIXED ENEMY AI: Stays aggressively on screen next to player
+            // --- ADVANCED REALISTIC AI AVOIDANCE ---
             enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.15; 
             enemyCar.rotation.z = (enemyCar.position.x - lanes[enemyLane]) * -0.06;
             
-            // Enemy hover distance relative to player's view (z=5 to z=12)
             enemyTargetZ = 6 + Math.sin(clock * 0.8) * 4; 
             enemyCar.position.z += (enemyTargetZ - enemyCar.position.z) * 0.05;
 
-            let danger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 70);
-            if(danger) { 
-                let safeLanes = [0,1,2,3].filter(l => !objects.some(o => o.lane === l && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 70));
-                if(safeLanes.length > 0) { safeLanes.sort((a,b) => Math.abs(a - playerLane) - Math.abs(b - playerLane)); enemyLane = safeLanes[0]; }
-            } else if(enemyCar.position.z > playerCar.position.z + 2 && Math.random() < 0.01) enemyLane = playerLane; 
+            // Look ahead to find obstacles in current lane
+            let myDanger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 80);
+            
+            if(myDanger) { 
+                // AI Evaluate Left and Right Lanes for most open space
+                let leftLane = enemyLane - 1;
+                let rightLane = enemyLane + 1;
+                
+                let leftDist = -1; let rightDist = -1;
+                
+                if (leftLane >= 0) {
+                    let oLeft = objects.find(o => o.lane === leftLane && o.position.z > enemyCar.position.z);
+                    leftDist = oLeft ? oLeft.position.z : Infinity;
+                }
+                if (rightLane <= 3) {
+                    let oRight = objects.find(o => o.lane === rightLane && o.position.z > enemyCar.position.z);
+                    rightDist = oRight ? oRight.position.z : Infinity;
+                }
+
+                // Choose the lane with the furthest obstacle
+                if (leftDist > rightDist && leftDist > enemyCar.position.z + 20) {
+                    enemyLane = leftLane;
+                } else if (rightDist > leftDist && rightDist > enemyCar.position.z + 20) {
+                    enemyLane = rightLane;
+                }
+            } else if(enemyCar.position.z > playerCar.position.z + 2 && Math.random() < 0.01) {
+                // Aggressive block if clear
+                enemyLane = playerLane; 
+            }
 
             if(camera.fov < 75 + (baseSpeed * 35)) { camera.fov += 0.05; camera.updateProjectionMatrix(); }
             roadLines.forEach(l => { l.position.z -= baseSpeed * 3; if(l.position.z < -10) l.position.z = 200; });
