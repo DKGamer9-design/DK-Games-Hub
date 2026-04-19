@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DK Games Hub</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        /* 2026 Glassmorphism & Neon UI */
+        :root { --neon: #00ffcc; --glass: rgba(15, 15, 20, 0.75); }
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; transition: background 0.5s; }
+        
+        #header { position: absolute; top: 0; width: 100%; padding: 15px 30px; background: var(--glass); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 10; }
+        .title { font-size: 30px; font-weight: 900; letter-spacing: 2px; color: var(--neon); text-shadow: 0 0 15px var(--neon); text-transform: uppercase; }
+        .economy { font-size: 22px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); }
+        
+        #sidebar { position: absolute; left: 20px; top: 90px; width: 300px; background: var(--glass); backdrop-filter: blur(12px); padding: 25px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 10; max-height: 80vh; overflow-y: auto; }
+        h3 { margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--neon); }
+        
+        button { width: 100%; padding: 12px; margin: 8px 0; border-radius: 6px; border: none; background: rgba(255,255,255,0.05); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.2); }
+        button:hover { background: var(--neon); color: #000; box-shadow: 0 0 15px var(--neon); border-color: var(--neon); }
+        
+        #achievements { position: absolute; bottom: 30px; right: 30px; background: var(--glass); padding: 15px 25px; border-radius: 8px; font-size: 18px; border: 1px solid #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); z-index: 10; backdrop-filter: blur(10px); }
+        .peanut { color: #ff4444 !important; border-color: #ff4444 !important; box-shadow: 0 0 15px rgba(255, 68, 68, 0.2) !important; }
+    </style>
+</head>
+<body>
+
+<div id="header">
+    <div class="title">DK Games Hub</div>
+    <div class="economy">Coins: <span id="coin-display">350</span></div>
+</div>
+
+<div id="sidebar">
+    <h3>Garage: 2017 Swift</h3>
+    <button onclick="buyMod(50, 'Sport Alloys')">Buy Sport Alloys (-50 Coins)</button>
+    <button onclick="buyMod(100, 'Ambient Lighting')">Add Ambient Lighting (-100 Coins)</button>
+    <button onclick="buyMod(75, 'Matte Black Wrap')">Matte Black Wrap (-75 Coins)</button>
+
+    <h3 style="margin-top: 25px;">Environment Themes</h3>
+    <button onclick="buyTheme(30, 'neon')">Cyberpunk Neon (-30 Coins)</button>
+    <button onclick="buyTheme(30, 'mars')">Martian Dust (-30 Coins)</button>
+
+    <h3 style="margin-top: 25px;">Select Game</h3>
+    <button onclick="startGame(1)">1. [Slot Open]</button>
+    <button onclick="startGame(2)">2. [Slot Open]</button>
+    <button onclick="startGame(3)">3. [Slot Open]</button>
+    <button onclick="startGame(4)">4. [Slot Open]</button>
+</div>
+
+<div id="achievements">Status: <span id="rank-display" style="color: #00ffcc; font-weight: bold;">Unranked</span></div>
+
+<script>
+    // --- ECONOMY & STATE SYSTEM ---
+    let coins = 350;
+    
+    function updateEconomy() {
+        document.getElementById('coin-display').innerText = coins;
+    }
+
+    function buyMod(cost, modName) {
+        if (coins >= cost) {
+            coins -= cost;
+            updateEconomy();
+            applyModification(modName);
+        } else {
+            alert("Insufficient Coins for " + modName);
+        }
+    }
+
+    function buyTheme(cost, themeName) {
+        if (coins >= cost) {
+            coins -= cost;
+            updateEconomy();
+            changeTheme(themeName);
+        } else {
+            alert("Insufficient Coins to change theme!");
+        }
+    }
+
+    // --- GAME LOGIC & ACHIEVEMENTS ---
+    function startGame(slotIndex) {
+        alert("Game " + slotIndex + " initiating. Waiting for your specific game rules...");
+        // Simulation of a win/loss for achievement testing
+        let playerWon = Math.random() > 0.5; // 50% chance to win or lose for testing
+        
+        let achBox = document.getElementById('achievements');
+        let rankText = document.getElementById('rank-display');
+
+        if (playerWon) {
+            coins += 100;
+            rankText.innerText = "Champion Tier";
+            rankText.style.color = "#00ffcc";
+            achBox.classList.remove('peanut');
+            alert("You Won! +100 Coins");
+        } else {
+            rankText.innerText = "Peanut Tier";
+            rankText.style.color = "#ff4444";
+            achBox.classList.add('peanut');
+            alert("You lost... Welcome to the Peanut Tier.");
+        }
+        updateEconomy();
+    }
+
+    // --- 2026 GRAPHICS ENGINE (Three.js) ---
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050505, 0.02); // Environmental Fog
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    // Advanced Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, 10);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Dynamic Floor Grid (Cyberpunk Style)
+    const gridHelper = new THREE.GridHelper(200, 50, 0x00ffcc, 0x444444);
+    gridHelper.position.y = -1;
+    scene.add(gridHelper);
+
+    // 3D Car Model (Placeholder Base)
+    const carGroup = new THREE.Group();
+    const bodyGeometry = new THREE.BoxGeometry(2.2, 1.2, 4.5);
+    const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.8 });
+    const carBody = new THREE.Mesh(bodyGeometry, bodyMaterial);
+    carBody.castShadow = true;
+    carGroup.add(carBody);
+    scene.add(carGroup);
+
+    camera.position.set(5, 3, 7);
+    camera.lookAt(0, 0, 0);
+
+    // Modification Visualizers
+    function applyModification(modName) {
+        if(modName === 'Matte Black Wrap') {
+            bodyMaterial.color.setHex(0x222222);
+            bodyMaterial.roughness = 0.9;
+            bodyMaterial.metalness = 0.1;
+        }
+        if(modName === 'Ambient Lighting') {
+            const cabinLight = new THREE.PointLight(0x00ffcc, 2, 5);
+            cabinLight.position.set(0, 0.5, 0);
+            carGroup.add(cabinLight);
+            document.documentElement.style.setProperty('--neon', '#00ffcc'); // Sync UI with car
+        }
+        if(modName === 'Sport Alloys') {
+            // Placeholder for changing wheel geometry
+            alert("Sport Alloys equipped! Handling increased.");
+        }
+    }
+
+    // Theme Visualizers
+    function changeTheme(themeName) {
+        if(themeName === 'neon') {
+            scene.fog.color.setHex(0x050015);
+            document.body.style.background = "#050015";
+            gridHelper.material.color.setHex(0xff00ff);
+            document.documentElement.style.setProperty('--neon', '#ff00ff');
+        }
+        if(themeName === 'mars') {
+            scene.fog.color.setHex(0x331100);
+            document.body.style.background = "#331100";
+            gridHelper.material.color.setHex(0xff6600);
+            document.documentElement.style.setProperty('--neon', '#ff6600');
+        }
+    }
+
+    // Render Loop
+    function animate() {
+        requestAnimationFrame(animate);
+        carGroup.rotation.y += 0.005; // Slow showcase spin
+        renderer.render(scene, camera);
+    }
+    
+    // Handle Window Resizing
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    animate();
+</script>
+</body>
+</html>
