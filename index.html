@@ -3,29 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DK Games Hub - Ultimate</title>
+    <title>DK Games Hub - Mobile Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --neon: #00ffcc; --glass: rgba(10, 10, 15, 0.85); }
-        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; transition: background 0.5s; }
+        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; }
         
-        /* UI Hub */
-        #header { position: absolute; top: 0; width: 100%; padding: 15px 30px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
-        .title { font-size: 28px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); text-transform: uppercase; }
-        .economy { font-size: 20px; font-weight: bold; color: #ffd700; }
+        /* Main Hub UI */
+        #header { position: absolute; top: 0; width: 100%; padding: 15px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; z-index: 20; }
+        .title { font-size: 24px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); text-transform: uppercase; }
+        .economy { font-size: 18px; font-weight: bold; color: #ffd700; }
         
-        #sidebar { position: absolute; left: 20px; top: 80px; width: 300px; background: var(--glass); backdrop-filter: blur(10px); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 20; max-height: 80vh; overflow-y: auto; }
-        h3 { margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--neon); }
-        button { width: 100%; padding: 12px; margin: 6px 0; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); border-color: var(--neon); }
-        .play-btn { background: rgba(0, 255, 204, 0.2); border-color: var(--neon); color: var(--neon); font-size: 18px; text-transform: uppercase; padding: 15px; }
+        #sidebar { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 85%; max-width: 350px; background: var(--glass); backdrop-filter: blur(15px); padding: 25px; border-radius: 15px; border: 1px solid var(--neon); box-shadow: 0 0 30px rgba(0, 255, 204, 0.1); z-index: 20; max-height: 80vh; overflow-y: auto; text-align: center; }
+        h3 { margin-top: 0; color: white; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
         
-        #achievements { position: absolute; bottom: 20px; right: 20px; background: var(--glass); padding: 15px; border-radius: 8px; border: 1px solid #ffd700; z-index: 20; backdrop-filter: blur(10px); }
+        button { width: 100%; padding: 15px; margin: 8px 0; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-weight: bold; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        button:hover { background: var(--neon); color: black; box-shadow: 0 0 15px var(--neon); }
+        .play-btn { background: rgba(0, 255, 204, 0.2); border-color: var(--neon); color: var(--neon); font-size: 20px; text-transform: uppercase; margin-top: 20px; }
         
+        /* Stats Display */
+        #stats-bar { display: flex; justify-content: space-between; font-size: 14px; color: #aaa; margin-bottom: 15px; }
+        .stat { color: #00ffcc; font-weight: bold; }
+
         /* In-Game UI */
         #hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); font-size: 32px; font-weight: bold; color: white; text-shadow: 2px 2px 5px black; display: none; z-index: 10; }
-        #touch-zones { position: absolute; bottom: 0; width: 100%; height: 100%; display: none; z-index: 5; }
-        .touch-half { width: 50%; height: 100%; float: left; }
+        
+        /* Mobile Digital Gamepad */
+        #mobile-controls { position: absolute; bottom: 20px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 50; }
+        .steer-btn { width: 80px; height: 80px; background: rgba(0, 255, 204, 0.2); border: 2px solid var(--neon); border-radius: 50%; color: var(--neon); font-size: 30px; font-weight: bold; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(0, 255, 204, 0.3); active: background: var(--neon); color: black; }
     </style>
 </head>
 <body>
@@ -36,50 +41,66 @@
 </div>
 
 <div id="sidebar">
-    <h3>2017 Swift Garage</h3>
-    <button onclick="buyMod(50, 'Sport Alloys')">Sport Alloys (-50 Coins)</button>
-    <button onclick="buyMod(100, 'Ambient Lighting')">Ambient Light (-100 Coins)</button>
-    <button onclick="buyMod(75, 'Matte Black')">Matte Black Wrap (-75 Coins)</button>
+    <h3>Garage: 2017 Swift</h3>
+    <div id="stats-bar">
+        <div>Top Speed: <span class="stat" id="stat-speed">Level 1</span></div>
+        <div>Handling: <span class="stat" id="stat-handling">Level 1</span></div>
+    </div>
 
-    <h3 style="margin-top: 20px;">Themes</h3>
-    <button onclick="buyTheme(30, 'neon')">Cyberpunk Neon (-30 Coins)</button>
-    <button onclick="buyTheme(30, 'daylight')">Clear Daylight (-30 Coins)</button>
-
-    <h3 style="margin-top: 20px;">Select Game</h3>
-    <button class="play-btn" onclick="startGame(1)">1. 3D Pro Racing</button>
-    <button onclick="alert('Slot Open for Future Games')">2. [Slot Open]</button>
-    <button onclick="alert('Slot Open for Future Games')">3. [Slot Open]</button>
-    <button onclick="alert('Slot Open for Future Games')">4. [Slot Open]</button>
+    <button onclick="buyMod(100, 'ECU Remap')">ECU Remap (+Speed) - 100 Coins</button>
+    <button onclick="buyMod(120, 'Racing Tires')">Racing Tires (+Handling) - 120 Coins</button>
+    <button onclick="buyMod(80, 'Neon Underglow')">Neon Underglow (Visual) - 80 Coins</button>
+    
+    <button class="play-btn" onclick="startGame()">▶ Start Race</button>
 </div>
 
-<div id="achievements">Rank: <span id="rank-display" style="color: #00ffcc;">Beginner</span></div>
-
 <div id="hud">Score: <span id="score-display">0</span></div>
-<div id="touch-zones">
-    <div class="touch-half" id="left-zone"></div>
-    <div class="touch-half" id="right-zone"></div>
+
+<div id="mobile-controls">
+    <div class="steer-btn" id="btn-left">◀</div>
+    <div class="steer-btn" id="btn-right">▶</div>
 </div>
 
 <script>
-    // --- 1. STATE & ECONOMY ---
+    // --- 1. CORE PHYSICS & ECONOMY VARIABLES ---
     let gameState = 'HUB'; 
-    let coins = 350; let score = 0; let gameSpeed = 0.6;
+    let coins = 350; let score = 0; 
+    let baseSpeed = 0.6; // Speed of the game
+    let scoreMultiplier = 1.0; // Increases with Engine upgrade
+    let handlingSpeed = 0.15; // How fast car changes lanes. Increases with Tires.
+    
     let playerLane = 1; let enemyLane = 2; const lanes = [-4.5, -1.5, 1.5, 4.5];
-    let objects = []; let environment = [];
+    let objects = []; 
 
     function updateUI() { document.getElementById('coin-display').innerText = coins; }
 
     function buyMod(cost, mod) {
-        if(coins >= cost) { coins -= cost; updateUI(); applyModification(mod); }
-        else alert("Not enough coins!");
+        if(coins >= cost) {
+            coins -= cost; updateUI();
+            
+            // FUNCTIONAL UPGRADES
+            if(mod === 'ECU Remap') {
+                scoreMultiplier += 0.5; // Earn points faster
+                document.getElementById('stat-speed').innerText = "Level 2";
+                alert("ECU Remapped! You now earn score 50% faster.");
+            }
+            if(mod === 'Racing Tires') {
+                handlingSpeed = 0.35; // Instantly switch lanes
+                document.getElementById('stat-handling').innerText = "Max";
+                alert("Racing Tires fitted! Steering is now ultra-responsive.");
+            }
+            if(mod === 'Neon Underglow') {
+                const neon = new THREE.PointLight(0x00ffcc, 3, 8); 
+                neon.position.set(0, 0, 0); 
+                playerCar.add(neon);
+                alert("Neon Underglow installed!");
+            }
+        } else {
+            alert("Not enough coins! Race to earn more.");
+        }
     }
 
-    function buyTheme(cost, theme) {
-        if(coins >= cost) { coins -= cost; updateUI(); changeTheme(theme); }
-        else alert("Not enough coins!");
-    }
-
-    // --- 2. ADVANCED 3D ENGINE ---
+    // --- 2. ADVANCED THREE.JS GRAPHICS ---
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x050510);
     scene.fog = new THREE.Fog(0x050510, 20, 120);
@@ -88,80 +109,82 @@
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     document.body.appendChild(renderer.domElement);
 
     // Dynamic Lighting
-    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
-    sun.position.set(-20, 30, -10); sun.castShadow = true;
-    scene.add(sun);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(10, 20, -10); dirLight.castShadow = true;
+    scene.add(dirLight);
 
     // Environment
-    const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 300), new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8 }));
-    road.rotation.x = -Math.PI / 2; road.receiveShadow = true;
-    scene.add(road);
+    const road = new THREE.Mesh(new THREE.PlaneGeometry(14, 300), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+    road.rotation.x = -Math.PI / 2; road.receiveShadow = true; scene.add(road);
 
     const grass = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshStandardMaterial({ color: 0x0a1a0a }));
-    grass.rotation.x = -Math.PI / 2; grass.position.y = -0.1; grass.receiveShadow = true;
-    scene.add(grass);
+    grass.rotation.x = -Math.PI / 2; grass.position.y = -0.1; scene.add(grass);
 
-    // --- 3. GRAPHICALLY ENHANCED CAR BUILDER ---
-    let playerMaterial = new THREE.MeshStandardMaterial({ color: 0xcc0000, metalness: 0.8, roughness: 0.2 });
+    // --- 3. HIGH-END CAR BUILDER (MeshPhysicalMaterial for real car paint) ---
+    // This gives the car a shiny, clearcoat metallic reflection like Play Store games.
+    const paintMaterial = new THREE.MeshPhysicalMaterial({ 
+        color: 0xcc0000, metalness: 0.8, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.1 
+    });
     
     function createCar(material, isPlayer) {
         const group = new THREE.Group();
-        const chassis = new THREE.Mesh(new THREE.BoxGeometry(2, 0.6, 4), material);
+        // Sleeker Chassis
+        const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4.2), material);
         chassis.position.y = 0.5; chassis.castShadow = true; group.add(chassis);
         
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 2), new THREE.MeshStandardMaterial({color: 0x050505, roughness: 0.1}));
+        // Cabin
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.5, 2.2), new THREE.MeshStandardMaterial({color: 0x050505, roughness: 0.0}));
         cabin.position.set(0, 1.05, -0.2); cabin.castShadow = true; group.add(cabin);
 
-        // Headlights (PointLights)
+        // Headlights casting actual light
         if(isPlayer) {
-            const hLight1 = new THREE.PointLight(0xffffff, 1, 20); hLight1.position.set(-0.6, 0.6, 2.5); group.add(hLight1);
-            const hLight2 = new THREE.PointLight(0xffffff, 1, 20); hLight2.position.set(0.6, 0.6, 2.5); group.add(hLight2);
+            const hLight1 = new THREE.SpotLight(0xffffff, 2, 40, 0.5, 0.5, 1);
+            hLight1.position.set(-0.7, 0.6, 2.5); hLight1.target.position.set(-0.7, 0, 10);
+            group.add(hLight1); group.add(hLight1.target);
+            
+            const hLight2 = new THREE.SpotLight(0xffffff, 2, 40, 0.5, 0.5, 1);
+            hLight2.position.set(0.7, 0.6, 2.5); hLight2.target.position.set(0.7, 0, 10);
+            group.add(hLight2); group.add(hLight2.target);
         }
-
         return group;
     }
 
-    const playerCar = createCar(playerMaterial, true); scene.add(playerCar);
-    const enemyCar = createCar(new THREE.MeshStandardMaterial({color: 0x0044cc, metalness: 0.8, roughness: 0.2}), false); scene.add(enemyCar);
+    const playerCar = createCar(paintMaterial, true); scene.add(playerCar);
+    const enemyCar = createCar(new THREE.MeshPhysicalMaterial({color: 0x0044cc, metalness: 0.8, roughness: 0.1, clearcoat: 1.0}), false); scene.add(enemyCar);
 
-    // Modifications & Themes
-    function applyModification(mod) {
-        if(mod === 'Matte Black') { playerMaterial.color.setHex(0x111111); playerMaterial.roughness = 0.9; playerMaterial.metalness = 0.1; }
-        if(mod === 'Ambient Lighting') { const neon = new THREE.PointLight(0x00ffcc, 2, 5); neon.position.y = 1; playerCar.add(neon); }
-        if(mod === 'Sport Alloys') alert("Alloys Installed! Grip increased.");
-    }
-
-    function changeTheme(theme) {
-        if(theme === 'daylight') {
-            scene.background.setHex(0x87CEEB); scene.fog.color.setHex(0x87CEEB);
-            grass.material.color.setHex(0x228B22); sun.intensity = 1.2;
-        }
-        if(theme === 'neon') {
-            scene.background.setHex(0x050015); scene.fog.color.setHex(0x050015);
-            grass.material.color.setHex(0x0a001a); sun.intensity = 0.5;
-        }
-    }
-
-    // --- 4. GAME MECHANICS ---
+    // --- 4. MOBILE-OPTIMIZED CONTROLS ---
     function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
     function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
-    window.addEventListener('keydown', (e) => { if(e.key === 'ArrowLeft') moveLeft(); if(e.key === 'ArrowRight') moveRight(); });
-    document.getElementById('left-zone').addEventListener('touchstart', moveLeft); document.getElementById('right-zone').addEventListener('touchstart', moveRight);
 
-    function startGame(id) {
-        gameState = 'PLAYING'; score = 0; gameSpeed = 0.6; playerLane = 1; enemyLane = 2;
+    // Keyboard bindings
+    window.addEventListener('keydown', (e) => { 
+        if(e.key === 'ArrowLeft') moveLeft(); 
+        if(e.key === 'ArrowRight') moveRight(); 
+    });
+
+    // Explicit Mobile Gamepad Bindings (Using standard Mouse/Touch events)
+    const btnLeft = document.getElementById('btn-left');
+    const btnRight = document.getElementById('btn-right');
+    
+    // Support both Touch (Mobile) and Click (Desktop Testing)
+    btnLeft.addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
+    btnLeft.addEventListener('mousedown', moveLeft);
+    btnRight.addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
+    btnRight.addEventListener('mousedown', moveRight);
+
+    // --- 5. GAME ENGINE ---
+    function startGame() {
+        gameState = 'PLAYING'; score = 0; baseSpeed = 0.6; playerLane = 1; enemyLane = 2;
         objects.forEach(o => scene.remove(o)); objects = [];
-        environment.forEach(e => scene.remove(e)); environment = [];
 
+        // UI Management
         document.getElementById('sidebar').style.display = 'none';
-        document.getElementById('achievements').style.display = 'none';
         document.getElementById('hud').style.display = 'block';
-        document.getElementById('touch-zones').style.display = 'block';
+        document.getElementById('mobile-controls').style.display = 'flex'; // Show Gamepad
 
         camera.position.set(0, 5, -8); camera.lookAt(0, 1, 10);
         playerCar.position.set(lanes[playerLane], 0, 5);
@@ -169,9 +192,9 @@
     }
 
     function spawnObstacle() {
-        const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1, 1.8), new THREE.MeshStandardMaterial({ color: 0xffaa00, roughness: 0.5 }));
+        const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xff3300, roughness: 0.3 }));
         const lane = Math.floor(Math.random() * 4);
-        obs.position.set(lanes[lane], 0.5, 120); obs.castShadow = true; obs.lane = lane;
+        obs.position.set(lanes[lane], 0.6, 120); obs.castShadow = true; obs.lane = lane;
         scene.add(obs); objects.push(obs);
     }
 
@@ -181,27 +204,37 @@
 
         if (gameState === 'HUB') {
             playerCar.position.set(0,0,0); playerCar.rotation.y += 0.005;
-            camera.position.set(5, 3, -7); camera.lookAt(0,0,0);
+            camera.position.set(6, 4, -8); camera.lookAt(0,0,0);
             enemyCar.position.y = -100; // Hide enemy in hub
         } 
         else if (gameState === 'PLAYING') {
             playerCar.rotation.y = 0; enemyCar.position.y = 0;
-            playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * 0.15;
+            
+            // Applying handling stat from Garage
+            playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed;
             playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.05;
             
             enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.1;
-            let danger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 40);
+            
+            // Enemy Dodge Logic
+            let danger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 50);
             if(danger) { if(enemyLane > 0) enemyLane--; else enemyLane++; }
 
-            gameSpeed += 0.0002; score += gameSpeed;
+            // Applying Score Multiplier from Garage
+            baseSpeed += 0.0002; 
+            score += (baseSpeed * scoreMultiplier); 
             document.getElementById('score-display').innerText = Math.floor(score);
 
-            timer += gameSpeed; if(timer > 2) { spawnObstacle(); timer = 0; }
+            timer += baseSpeed; if(timer > 1.8) { spawnObstacle(); timer = 0; }
 
             objects.forEach((obj, index) => {
-                obj.position.z -= gameSpeed * 2;
+                obj.position.z -= baseSpeed * 2.5; // Obstacle incoming speed
                 if(obj.position.z < -10) { scene.remove(obj); objects.splice(index, 1); }
-                if(Math.abs(playerCar.position.x - obj.position.x) < 1.5 && Math.abs(playerCar.position.z - obj.position.z) < 2) gameOver();
+                
+                // Collision Hitbox
+                if(Math.abs(playerCar.position.x - obj.position.x) < 1.6 && Math.abs(playerCar.position.z - obj.position.z) < 2.5) {
+                    gameOver();
+                }
             });
         }
         renderer.render(scene, camera);
@@ -209,19 +242,26 @@
 
     function gameOver() {
         gameState = 'HUB'; 
-        let reward = Math.floor(score / 50); coins += reward; updateUI();
-        let rank = score > 500 ? "Champion" : "Peanut Tier";
-        document.getElementById('rank-display').innerText = rank;
-        document.getElementById('rank-display').style.color = score > 500 ? "#ffd700" : "#ff4444";
+        let reward = Math.floor(score / 40); coins += reward; updateUI();
         
         document.getElementById('sidebar').style.display = 'block';
-        document.getElementById('achievements').style.display = 'block';
         document.getElementById('hud').style.display = 'none';
-        document.getElementById('touch-zones').style.display = 'none';
-        alert(`CRASHED! Score: ${Math.floor(score)}. Earned ${reward} coins.`);
+        document.getElementById('mobile-controls').style.display = 'none'; // Hide Gamepad
+        
+        document.getElementById('sidebar').innerHTML = `
+            <h2 style="color:#ff3300; margin-top:0;">CRASHED!</h2>
+            <p>Score: ${Math.floor(score)}</p>
+            <p style="color:#ffd700;">Earned: +${reward} Coins</p>
+            <button class="play-btn" onclick="location.reload()">Back to Garage</button>
+        `;
     }
 
-    window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    window.addEventListener('resize', () => { 
+        camera.aspect = window.innerWidth / window.innerHeight; 
+        camera.updateProjectionMatrix(); 
+        renderer.setSize(window.innerWidth, window.innerHeight); 
+    });
+    
     animate();
 </script>
 </body>
