@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DK Games Hub - Street Realism</title>
+    <title>DK Games Hub - Complete Street Realism</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --neon: #00ffcc; --glass: rgba(5, 10, 15, 0.85); }
@@ -88,12 +88,14 @@
 </div>
 
 <script>
+    // --- UI TAB LOGIC ---
     function switchTab(tab) {
         document.getElementById('content-garage').classList.remove('active'); document.getElementById('content-games').classList.remove('active');
         document.getElementById('tab-btn-garage').classList.remove('active'); document.getElementById('tab-btn-games').classList.remove('active');
         document.getElementById('content-' + tab).classList.add('active'); document.getElementById('tab-btn-' + tab).classList.add('active');
     }
 
+    // --- AUDIO SYSTEM ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -110,6 +112,7 @@
         }
     }
 
+    // --- ECONOMY ---
     let coins = 350; let scoreMultiplier = 1.0; let handlingSpeed = 0.15;
     function loadSaveData() {
         if(localStorage.getItem('dkCoins')) coins = parseInt(localStorage.getItem('dkCoins'));
@@ -127,6 +130,7 @@
     }
     loadSaveData();
 
+    // --- REFLEX GAME ---
     let reflexState = 'waiting'; let reflexStart = 0; let reflexTimer;
     function startReflexGame() {
         document.getElementById('sidebar').style.display = 'none';
@@ -143,6 +147,7 @@
         } else { document.getElementById('reflex-game').style.display = 'none'; document.getElementById('sidebar').style.display = 'block'; switchTab('games'); }
     }
 
+    // --- 3D GRAPHICS ENGINE ---
     let gameState = 'HUB'; let score = 0; let baseSpeed = 0.15; 
     let playerLane = 1; let enemyLane = 2; const lanes = [-4.5, -1.5, 1.5, 4.5];
     let objects = []; let roadLines = [];
@@ -160,15 +165,12 @@
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.2));
     const moon = new THREE.DirectionalLight(0xffffff, 1.5); 
-    moon.position.set(20, 50, -20); 
-    moon.castShadow = true; 
-    moon.shadow.mapSize.width = 2048; 
-    moon.shadow.mapSize.height = 2048;
+    moon.position.set(20, 50, -20); moon.castShadow = true; 
+    moon.shadow.mapSize.width = 2048; moon.shadow.mapSize.height = 2048;
     scene.add(moon);
 
     const frontLight = new THREE.SpotLight(0xffffff, 4.0, 50, 0.6, 0.5, 1);
-    frontLight.position.set(0, 3, -10);
-    frontLight.target.position.set(0, 0, 0);
+    frontLight.position.set(0, 3, -10); frontLight.target.position.set(0, 0, 0);
     scene.add(frontLight); scene.add(frontLight.target);
 
     const starsGeo = new THREE.BufferGeometry(); const posArray = new Float32Array(400 * 3);
@@ -176,6 +178,7 @@
     starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
     const starsMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.8, color: 0xffffff, transparent: true, opacity: 0.8})); scene.add(starsMesh);
 
+    // Procedural Asphalt
     const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
     const ctx = canvas.getContext('2d');
     for(let i=0; i<5000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#111' : '#222'; ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2); }
@@ -195,9 +198,11 @@
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202, roughness: 0.0, metalness: 1.0})); cabin.position.set(0, 1.07, -0.2); cabin.castShadow = true; chassisNode.add(cabin);
         const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat); spoiler.position.set(0, 1.2, -1.9); chassisNode.add(spoiler);
         
+        // Pure White LED Headlights
         const h1 = new THREE.SpotLight(0xffffff, 6, 120, 0.4, 0.8, 1); h1.position.set(-0.7, 0.6, 2.1); h1.target.position.set(-0.7, 0, 25); chassisNode.add(h1); chassisNode.add(h1.target);
         const h2 = new THREE.SpotLight(0xffffff, 6, 120, 0.4, 0.8, 1); h2.position.set(0.7, 0.6, 2.1); h2.target.position.set(0.7, 0, 25); chassisNode.add(h2); chassisNode.add(h2.target);
         
+        // Emissive Glowing Red Taillights
         const tLightMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0});
         const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), tLightMat); t1.position.set(-0.7, 0.6, -2.1); chassisNode.add(t1);
         const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), tLightMat); t2.position.set(0.7, 0.6, -2.1); chassisNode.add(t2);
@@ -208,7 +213,7 @@
     const playerCar = createCar(0xcc0000); scene.add(playerCar);
     const enemyCar = createCar(0x001144); scene.add(enemyCar);
 
-    // FIXED BUTTON CONTROLS
+    // FIXED MOBILE TOUCH CONTROLS
     function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
     function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
     
@@ -242,6 +247,8 @@
     }
 
     let timer = 0; let clock = 0; let enemyTargetZ = 8;
+    
+    // --- MAIN GAME LOOP ---
     function animate() {
         requestAnimationFrame(animate); clock += 0.05;
 
@@ -255,6 +262,7 @@
             playerCar.chassisNode.position.y = Math.sin(clock * 15) * 0.03; enemyCar.chassisNode.position.y = Math.cos(clock * 14) * 0.03;
             playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed; playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.08; 
             
+            // AI LOGIC
             enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.25; 
             enemyCar.rotation.z = (enemyCar.position.x - lanes[enemyLane]) * -0.06;
             
@@ -281,6 +289,7 @@
                 enemyLane = playerLane; 
             }
 
+            // SPEED & ENVIRONMENT
             if(camera.fov < 75 + (baseSpeed * 35)) { camera.fov += 0.05; camera.updateProjectionMatrix(); }
             roadTex.offset.y -= baseSpeed * 2; 
             roadLines.forEach(l => { l.position.z -= baseSpeed * 3; if(l.position.z < -10) l.position.z = 200; });
@@ -294,6 +303,7 @@
 
             timer += baseSpeed; if(timer > sRate) { spawnObstacles((Math.random() < mChance) ? 2 : 1); timer = 0; }
 
+            // COLLISIONS
             objects.forEach((o, i) => {
                 o.position.z -= baseSpeed * 3.0; if(o.position.z < -10) { scene.remove(o); objects.splice(i, 1); }
                 if(Math.abs(playerCar.position.x - o.position.x) < 1.6 && Math.abs(playerCar.position.z - o.position.z) < 2.5) {
@@ -301,13 +311,20 @@
                     let r = Math.floor(score / 50); coins += r; localStorage.setItem('dkCoins', coins); loadSaveData();
                     document.getElementById('sidebar').style.display = 'block'; document.getElementById('hud').style.display = 'none'; document.getElementById('mobile-controls').style.display = 'none'; 
                     switchTab('games');
-                    document.getElementById('content-games').innerHTML = `<h3 style="color:#ff0055;">CRASHED!</h3><p>Score: ${Math.floor(score)}</p><p style="color:#ffd700; margin-bottom: 20px;">Earned: +${r} Coins</p><button class="play-btn" onclick="location.reload()">Return to Hub</button>`;
+                    document.getElementById('content-games').innerHTML = `
+                        <h3 style="color:#ff0055;">CRASHED!</h3>
+                        <p>Score: ${Math.floor(score)}</p>
+                        <p style="color:#ffd700; margin-bottom: 20px;">Earned: +${r} Coins</p>
+                        <button class="play-btn" onclick="location.reload()">Return to Hub</button>
+                    `;
                 }
             });
         }
         renderer.render(scene, camera);
     }
     window.addEventListener('resize', () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
+    
+    // START ENGINE
     animate();
 </script>
 </body>
