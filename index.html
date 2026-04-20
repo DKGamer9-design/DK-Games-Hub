@@ -38,8 +38,10 @@
         #score-display { font-size: 42px; font-weight: 900; color: white; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
         #difficulty-display { font-size: 18px; font-weight: bold; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
         
-        #mobile-controls { position: absolute; bottom: 30px; width: 100%; display: none; justify-content: space-between; padding: 0 20px; box-sizing: border-box; z-index: 50; }
-        .steer-btn { width: 85px; height: 85px; background: rgba(255, 255, 255, 0.1); border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; color: #fff; font-size: 30px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(255, 255, 255, 0.2); backdrop-filter: blur(5px); }
+        /* FIXED MOBILE CONTROLS */
+        #mobile-controls { position: absolute; bottom: 40px; width: 100%; display: none; justify-content: space-between; padding: 0 30px; box-sizing: border-box; z-index: 1000; }
+        .steer-btn { width: 100px; height: 100px; background: rgba(255, 255, 255, 0.15); border: 3px solid rgba(255,255,255,0.7); border-radius: 50%; color: #fff; font-size: 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); backdrop-filter: blur(5px); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .steer-btn:active { background: rgba(255,255,255,0.4); transform: scale(0.9); }
         
         #reflex-game { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #111; display: none; z-index: 30; justify-content: center; align-items: center; flex-direction: column; cursor: pointer; }
         #reflex-text { font-size: 30px; font-weight: bold; pointer-events: none; text-align: center; padding: 20px; }
@@ -86,14 +88,12 @@
 </div>
 
 <script>
-    // --- UI LOGIC ---
     function switchTab(tab) {
         document.getElementById('content-garage').classList.remove('active'); document.getElementById('content-games').classList.remove('active');
         document.getElementById('tab-btn-garage').classList.remove('active'); document.getElementById('tab-btn-games').classList.remove('active');
         document.getElementById('content-' + tab).classList.add('active'); document.getElementById('tab-btn-' + tab).classList.add('active');
     }
 
-    // --- AUDIO ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -110,7 +110,6 @@
         }
     }
 
-    // --- ECONOMY ---
     let coins = 350; let scoreMultiplier = 1.0; let handlingSpeed = 0.15;
     function loadSaveData() {
         if(localStorage.getItem('dkCoins')) coins = parseInt(localStorage.getItem('dkCoins'));
@@ -128,7 +127,6 @@
     }
     loadSaveData();
 
-    // --- REFLEX GAME ---
     let reflexState = 'waiting'; let reflexStart = 0; let reflexTimer;
     function startReflexGame() {
         document.getElementById('sidebar').style.display = 'none';
@@ -145,7 +143,6 @@
         } else { document.getElementById('reflex-game').style.display = 'none'; document.getElementById('sidebar').style.display = 'block'; switchTab('games'); }
     }
 
-    // --- MAX LIMITS 3D GRAPHICS ENGINE ---
     let gameState = 'HUB'; let score = 0; let baseSpeed = 0.15; 
     let playerLane = 1; let enemyLane = 2; const lanes = [-4.5, -1.5, 1.5, 4.5];
     let objects = []; let roadLines = [];
@@ -179,7 +176,6 @@
     starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
     const starsMesh = new THREE.Points(starsGeo, new THREE.PointsMaterial({size: 0.8, color: 0xffffff, transparent: true, opacity: 0.8})); scene.add(starsMesh);
 
-    // Procedural Asphalt Texture
     const canvas = document.createElement('canvas'); canvas.width = 256; canvas.height = 256;
     const ctx = canvas.getContext('2d');
     for(let i=0; i<5000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#111' : '#222'; ctx.fillRect(Math.random()*256, Math.random()*256, 2, 2); }
@@ -193,17 +189,15 @@
 
     function createCar(mainColor) {
         const group = new THREE.Group(); const chassisNode = new THREE.Group(); 
-        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 0.9, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.1 }); 
+        const pMat = new THREE.MeshPhysicalMaterial({ color: mainColor, metalness: 1.0, roughness: 0.1, clearcoat: 1.0, clearcoatRoughness: 0.05 }); 
         
         const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.6, 4.2), pMat); chassis.position.y = 0.5; chassis.castShadow = true; chassisNode.add(chassis);
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202, roughness: 0.0, metalness: 1.0})); cabin.position.set(0, 1.07, -0.2); cabin.castShadow = true; chassisNode.add(cabin);
         const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat); spoiler.position.set(0, 1.2, -1.9); chassisNode.add(spoiler);
         
-        // Pure White LED Headlights
         const h1 = new THREE.SpotLight(0xffffff, 6, 120, 0.4, 0.8, 1); h1.position.set(-0.7, 0.6, 2.1); h1.target.position.set(-0.7, 0, 25); chassisNode.add(h1); chassisNode.add(h1.target);
         const h2 = new THREE.SpotLight(0xffffff, 6, 120, 0.4, 0.8, 1); h2.position.set(0.7, 0.6, 2.1); h2.target.position.set(0.7, 0, 25); chassisNode.add(h2); chassisNode.add(h2.target);
         
-        // Emissive Glowing Red Taillights
         const tLightMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 2.0});
         const t1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), tLightMat); t1.position.set(-0.7, 0.6, -2.1); chassisNode.add(t1);
         const t2 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), tLightMat); t2.position.set(0.7, 0.6, -2.1); chassisNode.add(t2);
@@ -211,14 +205,20 @@
         group.add(chassisNode); group.chassisNode = chassisNode; return group;
     }
 
-    const playerCar = createCar(0xcc0000); scene.add(playerCar); // Player Red
-    const enemyCar = createCar(0x001144); scene.add(enemyCar); // Enemy Dark Blue
+    const playerCar = createCar(0xcc0000); scene.add(playerCar);
+    const enemyCar = createCar(0x001144); scene.add(enemyCar);
 
+    // FIXED BUTTON CONTROLS
     function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
     function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
+    
     window.addEventListener('keydown', (e) => { if(e.key === 'ArrowLeft') moveLeft(); if(e.key === 'ArrowRight') moveRight(); });
+    
     document.getElementById('btn-left').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
+    document.getElementById('btn-left').addEventListener('mousedown', (e) => { e.preventDefault(); moveLeft(); });
+    
     document.getElementById('btn-right').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight(); });
+    document.getElementById('btn-right').addEventListener('mousedown', (e) => { e.preventDefault(); moveRight(); });
 
     function startRacingGame() {
         if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -235,7 +235,7 @@
         let used = [];
         for(let i=0; i<count; i++) {
             let l; do { l = Math.floor(Math.random() * 4); } while(used.includes(l)); used.push(l);
-            const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8 })); // Sleek metallic blocks
+            const obs = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.2, 1.8), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1, metalness: 0.8 })); 
             obs.position.set(lanes[l], 0.6, 200 + (Math.random()*15)); obs.castShadow = true; obs.lane = l; scene.add(obs); objects.push(obs);
             if(used.length >= 3) break; 
         }
@@ -255,31 +255,24 @@
             playerCar.chassisNode.position.y = Math.sin(clock * 15) * 0.03; enemyCar.chassisNode.position.y = Math.cos(clock * 14) * 0.03;
             playerCar.position.x += (lanes[playerLane] - playerCar.position.x) * handlingSpeed; playerCar.rotation.z = (playerCar.position.x - lanes[playerLane]) * -0.08; 
             
-            // --- ENHANCED COMPETITIVE AI ---
-            // Faster lateral movement (0.25 vs 0.15)
             enemyCar.position.x += (lanes[enemyLane] - enemyCar.position.x) * 0.25; 
             enemyCar.rotation.z = (enemyCar.position.x - lanes[enemyLane]) * -0.06;
             
             enemyTargetZ = 6 + Math.sin(clock * 0.8) * 4; 
             enemyCar.position.z += (enemyTargetZ - enemyCar.position.z) * 0.05;
 
-            // Increased scanning distance (120 units ahead)
             let myDanger = objects.find(o => o.lane === enemyLane && o.position.z > enemyCar.position.z && o.position.z < enemyCar.position.z + 120);
             
             if(myDanger) { 
-                // Scan all available lanes, pick the one with the furthest obstacle
                 let laneDistances = [0,1,2,3].map(l => {
                     let obj = objects.find(o => o.lane === l && o.position.z > enemyCar.position.z);
                     return { lane: l, dist: obj ? obj.position.z : Infinity };
                 });
                 
-                // Sort by distance (descending) so safest lane is first
                 laneDistances.sort((a,b) => b.dist - a.dist);
                 
-                // Prioritize the safest lane that is also closest to current position to avoid huge jumps
                 let bestLane = laneDistances[0].lane;
                 if(laneDistances[0].dist === Infinity && laneDistances[1].dist === Infinity) {
-                     // If multiple are completely safe, pick one closer to player to block
                      bestLane = Math.abs(laneDistances[0].lane - playerLane) < Math.abs(laneDistances[1].lane - playerLane) ? laneDistances[0].lane : laneDistances[1].lane;
                 }
                 enemyLane = bestLane;
@@ -289,7 +282,7 @@
             }
 
             if(camera.fov < 75 + (baseSpeed * 35)) { camera.fov += 0.05; camera.updateProjectionMatrix(); }
-            roadTex.offset.y -= baseSpeed * 2; // Move road texture
+            roadTex.offset.y -= baseSpeed * 2; 
             roadLines.forEach(l => { l.position.z -= baseSpeed * 3; if(l.position.z < -10) l.position.z = 200; });
 
             baseSpeed += 0.00003; score += (baseSpeed * scoreMultiplier * 5); document.getElementById('score-display').innerText = Math.floor(score);
