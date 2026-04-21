@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>DK Games Hub - Ultimate Structure</title>
+    <title>DK Games Hub - BG Update</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root { --neon: #00ffcc; --glass: rgba(5, 10, 15, 0.85); }
-        body { margin: 0; overflow: hidden; background: #010205; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; }
+        body { margin: 0; overflow: hidden; background: #010205; font-family: 'Segoe UI', sans-serif; color: white; user-select: none; touch-action: none; -webkit-user-select: none; transition: background 0.5s; }
         
         #header { position: absolute; top: 0; width: 100%; padding: 15px 20px; background: var(--glass); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; align-items: center; z-index: 20; box-sizing: border-box; }
         .title { font-size: 22px; font-weight: 900; color: #fff; text-shadow: 0 0 10px #fff; text-transform: uppercase; letter-spacing: 2px; }
@@ -28,6 +28,10 @@
         .upgrade-btn:hover { background: #fff; color: black; box-shadow: 0 0 15px #fff; }
         .upgrade-btn:disabled { opacity: 0.5; cursor: not-allowed; color: #aaa; background: rgba(0,0,0,0.5); }
         
+        .bg-btn { border-color: #ff00ff; color: #ff00ff; }
+        .bg-btn:hover { background: #ff00ff; color: white; box-shadow: 0 0 15px #ff00ff; }
+        .bg-btn.owned { background: #ff00ff; color: white; }
+
         .play-btn { width: 100%; padding: 15px; margin: 8px 0; border-radius: 8px; background: rgba(255, 255, 255, 0.1); border: 1px solid #fff; color: #fff; font-size: 18px; font-weight: bold; text-transform: uppercase; cursor: pointer; box-shadow: inset 0 0 10px rgba(255,255,255,0.2); transition: 0.3s; }
         .play-btn:hover { background: #fff; color: black; box-shadow: 0 0 20px #fff; }
         
@@ -38,7 +42,6 @@
         #score-display { font-size: 42px; font-weight: 900; color: white; text-shadow: 0 4px 15px rgba(0,0,0,0.9); }
         #difficulty-display { font-size: 18px; font-weight: bold; color: #fff; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 2px 5px rgba(0,0,0,0.9); }
         
-        /* FIXED MOBILE CONTROLS */
         #mobile-controls { position: absolute; bottom: 40px; width: 100%; display: none; justify-content: space-between; padding: 0 30px; box-sizing: border-box; z-index: 1000; }
         .steer-btn { width: 100px; height: 100px; background: rgba(255, 255, 255, 0.15); border: 3px solid rgba(255,255,255,0.7); border-radius: 50%; color: #fff; font-size: 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 0 25px rgba(255, 255, 255, 0.3); backdrop-filter: blur(5px); cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
         .steer-btn:active { background: rgba(255,255,255,0.4); transform: scale(0.9); }
@@ -66,7 +69,11 @@
         <button class="upgrade-btn" id="btn-tires" onclick="buyMod(120, 'Tires')"><span>Pro Slicks (+Dodge)</span> <span>120c</span></button>
         
         <div class="section-title">Cosmetics</div>
-        <button class="upgrade-btn" id="btn-spoiler" onclick="buyMod(80, 'Spoiler')"><span>Carbon Spoiler (+Style)</span> <span>80c</span></button>
+        <button class="upgrade-btn" id="btn-spoiler" onclick="buyMod(80, 'Spoiler')"><span>Carbon Spoiler</span> <span>80c</span></button>
+        
+        <div class="section-title">Backgrounds (Buy / Sell)</div>
+        <button class="upgrade-btn bg-btn" id="btn-bg-sunset" onclick="handleBG('sunset', 150)"><span>🌅 Sunset Vibe</span> <span id="price-sunset">BUY 150c</span></button>
+        <button class="upgrade-btn bg-btn" id="btn-bg-cyber" onclick="handleBG('cyber', 150)"><span>🌌 Cyber Neon</span> <span id="price-cyber">BUY 150c</span></button>
     </div>
 
     <div id="content-games" class="tab-content">
@@ -114,8 +121,9 @@
         }
     }
 
-    // --- ECONOMY & SAVES ---
+    // --- ECONOMY, SAVES & BG LOGIC ---
     let coins = 350; let scoreMultiplier = 1.0; let handlingSpeed = 0.15; let hasSpoiler = false;
+    let unlockedBGs = { sunset: false, cyber: false };
     
     function loadSaveData() {
         if(localStorage.getItem('dkCoins')) coins = parseInt(localStorage.getItem('dkCoins'));
@@ -133,11 +141,56 @@
             if(mod === 'Spoiler') { 
                 hasSpoiler = true; localStorage.setItem('dkSpoiler', 'true'); 
                 document.getElementById('btn-spoiler').innerHTML = `<span>Carbon Spoiler</span> <span>EQUIPPED</span>`; document.getElementById('btn-spoiler').disabled = true; 
-                addSpoilerMesh(playerCar); // Visually attach without refreshing
+                addSpoilerMesh(playerCar); 
             }
             localStorage.setItem('dkCoins', coins); document.getElementById('coin-display').innerText = coins;
         } else alert("Not enough coins!");
     }
+
+    function handleBG(bgName, price) {
+        let btn = document.getElementById('btn-bg-' + bgName);
+        let priceSpan = document.getElementById('price-' + bgName);
+        
+        if (!unlockedBGs[bgName]) {
+            // BUY & EQUIP logic
+            if (coins >= price) {
+                // Sell the other one automatically if equipped
+                if(bgName === 'sunset' && unlockedBGs['cyber']) handleBG('cyber', price);
+                if(bgName === 'cyber' && unlockedBGs['sunset']) handleBG('sunset', price);
+
+                coins -= price; playSound('coin');
+                unlockedBGs[bgName] = true;
+                applyBG(bgName);
+                priceSpan.innerText = "SELL " + price + "c";
+                btn.classList.add('owned');
+            } else alert("Not enough coins!");
+        } else {
+            // SELL logic
+            coins += price; playSound('coin');
+            unlockedBGs[bgName] = false;
+            applyBG('night'); // Back to default
+            priceSpan.innerText = "BUY " + price + "c";
+            btn.classList.remove('owned');
+        }
+        localStorage.setItem('dkCoins', coins); document.getElementById('coin-display').innerText = coins;
+    }
+
+    function applyBG(bgName) {
+        if(bgName === 'night') {
+            scene.fog.color.setHex(0x010205); document.body.style.background = "#010205";
+            moon.color.setHex(0xffffff); road.material.color.setHex(0x050508);
+            starsMesh.material.color.setHex(0xffffff); starsMesh.visible = true;
+        } else if(bgName === 'sunset') {
+            scene.fog.color.setHex(0xff4400); document.body.style.background = "#ff4400";
+            moon.color.setHex(0xffaa00); road.material.color.setHex(0x1a0500);
+            starsMesh.visible = false;
+        } else if(bgName === 'cyber') {
+            scene.fog.color.setHex(0x110033); document.body.style.background = "#110033";
+            moon.color.setHex(0xff00ff); road.material.color.setHex(0x0a001a);
+            starsMesh.material.color.setHex(0xff00ff); starsMesh.visible = true;
+        }
+    }
+
     loadSaveData();
 
     // --- REFLEX GAME ---
@@ -167,10 +220,8 @@
     
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight); 
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; 
-    renderer.toneMappingExposure = 1.3;
+    renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.3;
     document.body.appendChild(renderer.domElement);
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.2));
@@ -198,13 +249,10 @@
 
     function addSpoilerMesh(carGroup) {
         const pMat = new THREE.MeshPhysicalMaterial({ color: 0xcc0000, metalness: 1.0, roughness: 0.1, clearcoat: 1.0 });
-        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat);
-        spoiler.position.set(0, 1.2, -1.9);
-        
+        const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat); spoiler.position.set(0, 1.2, -1.9);
         const pMatDark = new THREE.MeshStandardMaterial({color: 0x111111});
         const pillarL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.1), pMatDark); pillarL.position.set(-0.8, 1.1, -1.9);
         const pillarR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.1), pMatDark); pillarR.position.set(0.8, 1.1, -1.9);
-        
         carGroup.chassisNode.add(spoiler); carGroup.chassisNode.add(pillarL); carGroup.chassisNode.add(pillarR);
     }
 
@@ -216,7 +264,6 @@
         const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 2.2), new THREE.MeshStandardMaterial({color: 0x020202, roughness: 0.0, metalness: 1.0})); cabin.position.set(0, 1.07, -0.2); cabin.castShadow = true; chassisNode.add(cabin);
         
         if(!isPlayer) {
-            // Enemy always has a spoiler to look aggressive
             const spoiler = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.1, 0.4), pMat); spoiler.position.set(0, 1.2, -1.9); chassisNode.add(spoiler);
         }
 
@@ -230,16 +277,15 @@
         group.add(chassisNode); group.chassisNode = chassisNode; return group;
     }
 
-    const playerCar = createCar(0xcc0000, true); scene.add(playerCar);
-    const enemyCar = createCar(0x001144, false); scene.add(enemyCar);
+    // STRICT VEHICLE COLORS
+    const playerCar = createCar(0xcc0000, true); scene.add(playerCar); // YOU ARE RED
+    const enemyCar = createCar(0x001144, false); scene.add(enemyCar); // ENEMY IS DARK BLUE
 
-    // If player already bought spoiler, attach it on load
     if(hasSpoiler) addSpoilerMesh(playerCar);
 
-    // FIXED MOBILE TOUCH CONTROLS
+    // MOBILE TOUCH CONTROLS
     function moveLeft() { if(gameState === 'PLAYING' && playerLane > 0) playerLane--; }
     function moveRight() { if(gameState === 'PLAYING' && playerLane < 3) playerLane++; }
-    
     window.addEventListener('keydown', (e) => { if(e.key === 'ArrowLeft') moveLeft(); if(e.key === 'ArrowRight') moveRight(); });
     document.getElementById('btn-left').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft(); });
     document.getElementById('btn-left').addEventListener('mousedown', (e) => { e.preventDefault(); moveLeft(); });
@@ -312,34 +358,18 @@
 
             baseSpeed += 0.00003; score += (baseSpeed * scoreMultiplier * 5); document.getElementById('score-display').innerText = Math.floor(score);
             
-            // --- BALANCED DIFFICULTY RULES ---
-            let diff = document.getElementById('difficulty-display'); 
-            let sRate = 6.5; 
-            let boxCount = 1;
+            let diff = document.getElementById('difficulty-display'); let sRate = 6.5; let boxCount = 1;
 
             if(score < 600) { 
-                diff.innerText = "EASY"; diff.style.color = "#00ffcc"; 
-                sRate = 6.5; // Approx 200m distance between boxes
-                boxCount = 1; // Strict 1 box
-            }
-            else if(score < 1800) { 
-                diff.innerText = "MEDIUM"; diff.style.color = "#ffd700"; 
-                sRate = 3.5; 
-                boxCount = (Math.random() < 0.15) ? 2 : 1; // Rarely 2 boxes
-            }
-            else { 
-                diff.innerText = "HARD"; diff.style.color = "#ff0055"; 
-                sRate = 1.6; // Challenging but fair distance
-                boxCount = (Math.random() < 0.4) ? 2 : 1; // Tough but not impossible
+                diff.innerText = "EASY"; diff.style.color = "#00ffcc"; sRate = 6.5; boxCount = 1;
+            } else if(score < 1800) { 
+                diff.innerText = "MEDIUM"; diff.style.color = "#ffd700"; sRate = 3.5; boxCount = (Math.random() < 0.15) ? 2 : 1; 
+            } else { 
+                diff.innerText = "HARD"; diff.style.color = "#ff0055"; sRate = 1.6; boxCount = (Math.random() < 0.4) ? 2 : 1; 
             }
 
-            timer += baseSpeed; 
-            if(timer > sRate) { 
-                spawnObstacles(boxCount); 
-                timer = 0; 
-            }
+            timer += baseSpeed; if(timer > sRate) { spawnObstacles(boxCount); timer = 0; }
 
-            // COLLISIONS
             objects.forEach((o, i) => {
                 o.position.z -= baseSpeed * 3.0; if(o.position.z < -10) { scene.remove(o); objects.splice(i, 1); }
                 if(Math.abs(playerCar.position.x - o.position.x) < 1.6 && Math.abs(playerCar.position.z - o.position.z) < 2.5) {
